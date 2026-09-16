@@ -105,7 +105,7 @@ button { font: inherit; }
   transition: transform 900ms cubic-bezier(.65,0,.35,1);
 }
 
-.book[data-state="open"] { transform: translateX(0); }
+.book[data-state="opening"], .book[data-state="open"] { transform: translateX(0); }
 .book[data-state="back"] { transform: translateX(calc(var(--page-w) / 2)); }
 
 .back-board {
@@ -123,6 +123,12 @@ button { font: inherit; }
 .book[data-state="closed"] .left-stack,
 .book[data-state="closed"] .right-page,
 .book[data-state="closed"] .gutter { visibility: hidden; }
+.book[data-state="opening"] .left-page,
+.book[data-state="opening"] .left-stack { animation: reveal-left-page 900ms cubic-bezier(.65,0,.35,1) both; }
+@keyframes reveal-left-page {
+  0%, 43% { opacity: 0; }
+  56%, 100% { opacity: 1; }
+}
 
 .page-stack {
   position: absolute;
@@ -279,6 +285,7 @@ button { font: inherit; }
   box-shadow: 6px 10px 18px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.1), inset -3px 0 4px rgba(0,0,0,.25);
   transition: transform 900ms cubic-bezier(.65,0,.35,1), box-shadow .5s ease;
   transform: translateZ(12px);
+  will-change: transform;
 }
 
 .front-cover::before {
@@ -290,7 +297,21 @@ button { font: inherit; }
 }
 
 .cover-edge { position: absolute; inset: 0 auto 0 -8px; width: 12px; border-radius: 5px 0 0 5px; background: linear-gradient(90deg, #3c0d16, #761e2d); transform: translateZ(-4px); }
-.cover-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transform: translateZ(4px); }
+.cover-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transform: translateZ(4px); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.cover-inside {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  transform: rotateY(180deg) translateZ(2px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.31), transparent 12%),
+    linear-gradient(135deg, #762031, #902c40 55%, #681a29);
+  box-shadow: inset 0 0 0 12px rgba(76,16,28,.24), inset 0 0 0 13px rgba(239,220,184,.14);
+}
+.cover-inside i { position: absolute; inset: 18px; border: 1px solid rgba(239,220,184,.15); border-radius: 7px 2px 2px 7px; }
 .cover-content small { margin-bottom: 38px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; opacity: .68; }
 .cover-content strong { font-size: 29px; line-height: 1.08; letter-spacing: .1em; font-weight: 500; }
 .cover-content em { margin-top: 44px; font-size: 13px; opacity: .65; }
@@ -314,6 +335,7 @@ button { font: inherit; }
   background: linear-gradient(90deg, transparent, rgba(54,39,23,.23) 42%, rgba(37,26,14,.34) 50%, rgba(54,39,23,.22) 58%, transparent);
   transition: opacity .4s ease;
 }
+.book[data-state="opening"] .gutter,
 .book[data-state="open"] .gutter { opacity: 1; }
 
 .progress {

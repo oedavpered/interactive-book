@@ -49,12 +49,15 @@ function renderSpread() {
 function openBook() {
   if (isOpen || isAnimating) return;
   isAnimating = true;
-  book.dataset.state = "open";
   cover.classList.add("opening");
   hint.style.opacity = "0";
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { book.dataset.state = "opening"; });
+  });
   window.setTimeout(() => {
     cover.classList.remove("opening");
     cover.classList.add("opened");
+    book.dataset.state = "open";
     isOpen = true;
     isAnimating = false;
     hint.textContent = "Листайте кликом по странице или клавишами ← →";
