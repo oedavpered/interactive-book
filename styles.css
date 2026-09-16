@@ -164,14 +164,19 @@ button { font: inherit; }
   box-shadow: inset 0 0 18px rgba(90,67,38,.06);
   cursor: pointer;
   touch-action: none;
-  transition: transform 180ms ease, filter 180ms ease;
-  will-change: transform;
+  outline: none;
+  transition: filter 180ms ease, box-shadow 180ms ease;
+}
+
+.static-page:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(139, 98, 70, .24), inset 0 0 18px rgba(90,67,38,.06);
 }
 
 .left-page {
   right: 50%;
   border-radius: 5px 1px 1px 7px;
-  transform: rotateY(calc(1.2deg + var(--hover-turn, 0deg))) rotateX(var(--hover-lift, 0deg));
+  transform: rotateY(1.2deg);
   transform-origin: right center;
   background: linear-gradient(to left, #d8cdb5 0, #eee4cf 3%, var(--paper) 15%, #faf4e7 100%);
 }
@@ -179,7 +184,7 @@ button { font: inherit; }
 .right-page {
   left: 50%;
   border-radius: 1px 8px 8px 1px;
-  transform: rotateY(calc(-1.2deg + var(--hover-turn, 0deg))) rotateX(var(--hover-lift, 0deg));
+  transform: rotateY(-1.2deg);
   transform-origin: left center;
   background: linear-gradient(to right, #d5c8ad 0, #eee5d1 3%, var(--paper) 15%, #faf5e9 100%);
 }
