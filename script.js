@@ -26,6 +26,8 @@ const rightStack = document.querySelector("#rightStack");
 let spread = 0;
 let isOpen = false;
 let isAnimating = false;
+let drag = null;
+let suppressClickUntil = 0;
 const spreadCount = pages.length / 2;
 
 function pageMarkup(page) {
@@ -60,13 +62,14 @@ function openBook() {
     book.dataset.state = "open";
     isOpen = true;
     isAnimating = false;
-    hint.textContent = "Листайте кликом по странице или клавишами ← →";
+    hint.textContent = "Потяните страницу за край или используйте клавиши ← →";
     hint.style.opacity = "1";
     renderSpread();
   }, 900);
 }
 
 function turn(direction) {
+  if (Date.now() < suppressClickUntil) return;
   if (!isOpen || isAnimating) return;
   const next = spread + direction;
   if (direction > 0 && next >= spreadCount) {
@@ -93,6 +96,95 @@ function turn(direction) {
   }, 820);
 }
 
+function prepareFlip(direction) {
+  const next = spread + direction;
+  flipping.className = `flipping-page active dragging ${direction > 0 ? "drag-forward" : "drag-backward"}`;
+  if (direction > 0) {
+    flipFront.innerHTML = pageMarkup(pages[spread * 2 + 1]);
+    flipBack.innerHTML = pageMarkup(pages[next * 2]);
+  } else {
+    flipFront.innerHTML = pageMarkup(pages[next * 2 + 1]);
+    flipBack.innerHTML = pageMarkup(pages[spread * 2]);
+  }
+}
+
+function dragProgress(clientX, direction) {
+  const rect = book.getBoundingClientRect();
+  const spine = rect.left + rect.width / 2;
+  const pageWidth = rect.width / 2;
+  return direction > 0
+    ? Math.max(0, Math.min(1, (spine + pageWidth - clientX) / (pageWidth * 2)))
+    : Math.max(0, Math.min(1, (clientX - (spine - pageWidth)) / (pageWidth * 2)));
+}
+
+function applyDrag(progressValue, direction) {
+  const angle = direction > 0 ? -180 * progressValue : -180 + 180 * progressValue;
+  flipping.style.transform = `rotateY(${angle}deg)`;
+  flipping.style.setProperty("--drag-shade", Math.sin(Math.PI * progressValue).toFixed(3));
+}
+
+function beginPointerDrag(event, direction) {
+  if (!isOpen || isAnimating || drag) return;
+  const next = spread + direction;
+  if (next < 0 || next >= spreadCount) return;
+  drag = { pointerId: event.pointerId, direction, startX: event.clientX, progress: 0, active: false };
+  event.currentTarget.setPointerCapture?.(event.pointerId);
+}
+
+function movePointerDrag(event) {
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  if (!drag.active && Math.abs(event.clientX - drag.startX) < 5) return;
+  if (!drag.active) {
+    drag.active = true;
+    isAnimating = true;
+    prepareFlip(drag.direction);
+    document.body.classList.add("is-dragging");
+  }
+  event.preventDefault();
+  drag.progress = dragProgress(event.clientX, drag.direction);
+  applyDrag(drag.progress, drag.direction);
+}
+
+function endPointerDrag(event) {
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  const current = drag;
+  drag = null;
+  if (!current.active) return;
+  suppressClickUntil = Date.now() + 450;
+  document.body.classList.remove("is-dragging");
+  const complete = current.progress >= .34;
+  const targetProgress = complete ? 1 : 0;
+  const distance = Math.abs(targetProgress - current.progress);
+  const duration = Math.max(180, Math.round(460 * distance));
+  flipping.classList.remove("dragging");
+  flipping.classList.add("settling");
+  flipping.style.setProperty("--settle-time", `${duration}ms`);
+  requestAnimationFrame(() => applyDrag(targetProgress, current.direction));
+  window.setTimeout(() => {
+    if (complete) spread += current.direction;
+    renderSpread();
+    flipping.className = "flipping-page";
+    flipping.removeAttribute("style");
+    isAnimating = false;
+  }, duration + 30);
+}
+
+function reactToPointer(event, side) {
+  if (!isOpen || isAnimating) return;
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width - .5;
+  const y = (event.clientY - rect.top) / rect.height - .5;
+  event.currentTarget.style.setProperty("--hover-turn", `${x * (side === "right" ? -1.6 : 1.6)}deg`);
+  event.currentTarget.style.setProperty("--hover-lift", `${y * -.7}deg`);
+  event.currentTarget.style.filter = `brightness(${1 + Math.abs(x) * .025})`;
+}
+
+function clearPointerReaction(event) {
+  event.currentTarget.style.removeProperty("--hover-turn");
+  event.currentTarget.style.removeProperty("--hover-lift");
+  event.currentTarget.style.removeProperty("filter");
+}
+
 function closeToBack() {
   if (isAnimating) return;
   isAnimating = true;
@@ -116,7 +208,7 @@ function reopenFromBack() {
   window.setTimeout(() => {
     isOpen = true;
     isAnimating = false;
-    hint.textContent = "Листайте кликом по странице или клавишами ← →";
+    hint.textContent = "Потяните страницу за край или используйте клавиши ← →";
     renderSpread();
   }, 900);
 }
@@ -130,6 +222,15 @@ cover.addEventListener("click", openBook);
 backCover.addEventListener("click", reopenFromBack);
 rightPage.addEventListener("click", () => turn(1));
 leftPage.addEventListener("click", () => turn(-1));
+rightPage.addEventListener("pointerdown", (event) => beginPointerDrag(event, 1));
+leftPage.addEventListener("pointerdown", (event) => beginPointerDrag(event, -1));
+rightPage.addEventListener("pointermove", (event) => reactToPointer(event, "right"));
+leftPage.addEventListener("pointermove", (event) => reactToPointer(event, "left"));
+rightPage.addEventListener("pointerleave", clearPointerReaction);
+leftPage.addEventListener("pointerleave", clearPointerReaction);
+window.addEventListener("pointermove", movePointerDrag, { passive: false });
+window.addEventListener("pointerup", endPointerDrag);
+window.addEventListener("pointercancel", endPointerDrag);
 window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft" && book.dataset.state === "back") {
     reopenFromBack();
