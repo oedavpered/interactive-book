@@ -300,7 +300,7 @@ button { font: inherit; }
 
 .face-back {
   transform: rotateY(180deg);
-  border-radius: 1px calc(8px + var(--curl-radius)) calc(8px + var(--curl-radius)) 1px;
+  border-radius: calc(8px + var(--curl-radius)) 1px 1px calc(8px + var(--curl-radius));
   background: linear-gradient(to left, #d8cdb5, #eee4cf 4%, var(--paper) 16%);
 }
 
