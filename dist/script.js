@@ -119,7 +119,7 @@ function dragProgress(clientX, direction) {
 
 function applyDrag(progressValue, direction) {
   const angle = direction > 0 ? -180 * progressValue : -180 + 180 * progressValue;
-  flipping.style.transform = `rotateY(${angle}deg)`;
+  flipping.style.transform = `translateZ(2px) rotateY(${angle}deg)`;
   flipping.style.setProperty("--drag-shade", Math.sin(Math.PI * progressValue).toFixed(3));
 }
 
