@@ -176,7 +176,6 @@ button { font: inherit; }
 .left-page {
   right: 50%;
   border-radius: 5px 1px 1px 7px;
-  transform: rotateY(1.2deg);
   transform-origin: right center;
   background: linear-gradient(to left, #d8cdb5 0, #eee4cf 3%, var(--paper) 15%, #faf4e7 100%);
 }
@@ -184,7 +183,6 @@ button { font: inherit; }
 .right-page {
   left: 50%;
   border-radius: 1px 8px 8px 1px;
-  transform: rotateY(-1.2deg);
   transform-origin: left center;
   background: linear-gradient(to right, #d5c8ad 0, #eee5d1 3%, var(--paper) 15%, #faf5e9 100%);
 }
@@ -252,10 +250,10 @@ button { font: inherit; }
 .flipping-page.dragging { transition: none; }
 .flipping-page.settling { transition: transform var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1); }
 .flipping-page.forward { animation: flip-forward var(--turn-time) cubic-bezier(.65,0,.35,1) forwards; }
-.flipping-page.backward { transform: rotateY(-180deg); animation: flip-backward var(--turn-time) cubic-bezier(.65,0,.35,1) forwards; }
+.flipping-page.backward { transform: translateZ(2px) rotateY(-180deg); animation: flip-backward var(--turn-time) cubic-bezier(.65,0,.35,1) forwards; }
 
-@keyframes flip-forward { from { transform: rotateY(0deg); } to { transform: rotateY(-180deg); } }
-@keyframes flip-backward { from { transform: rotateY(-180deg); } to { transform: rotateY(0deg); } }
+@keyframes flip-forward { from { transform: translateZ(2px) rotateY(0deg); } to { transform: translateZ(2px) rotateY(-180deg); } }
+@keyframes flip-backward { from { transform: translateZ(2px) rotateY(-180deg); } to { transform: translateZ(2px) rotateY(0deg); } }
 
 .face {
   position: absolute;
