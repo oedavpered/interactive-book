@@ -78,7 +78,6 @@ function turn(direction) {
   }
   if (next < 0) return;
   isAnimating = true;
-  flipping.className = `flipping-page active ${direction > 0 ? "forward" : "backward"}`;
 
   if (direction > 0) {
     flipFront.innerHTML = pageMarkup(pages[spread * 2 + 1]);
@@ -87,6 +86,8 @@ function turn(direction) {
     flipFront.innerHTML = pageMarkup(pages[next * 2 + 1]);
     flipBack.innerHTML = pageMarkup(pages[spread * 2]);
   }
+  stageTargetUnderlay(direction, next);
+  flipping.className = `flipping-page active ${direction > 0 ? "forward" : "backward"}`;
 
   window.setTimeout(() => {
     spread = next;
@@ -96,9 +97,16 @@ function turn(direction) {
   }, 820);
 }
 
+function stageTargetUnderlay(direction, next) {
+  if (direction > 0) {
+    rightPage.querySelector(".paper-content").innerHTML = pageMarkup(pages[next * 2 + 1]);
+  } else {
+    leftPage.querySelector(".paper-content").innerHTML = pageMarkup(pages[next * 2]);
+  }
+}
+
 function prepareFlip(direction) {
   const next = spread + direction;
-  flipping.className = `flipping-page active dragging ${direction > 0 ? "drag-forward" : "drag-backward"}`;
   if (direction > 0) {
     flipFront.innerHTML = pageMarkup(pages[spread * 2 + 1]);
     flipBack.innerHTML = pageMarkup(pages[next * 2]);
@@ -106,6 +114,8 @@ function prepareFlip(direction) {
     flipFront.innerHTML = pageMarkup(pages[next * 2 + 1]);
     flipBack.innerHTML = pageMarkup(pages[spread * 2]);
   }
+  stageTargetUnderlay(direction, next);
+  flipping.className = `flipping-page active dragging ${direction > 0 ? "drag-forward" : "drag-backward"}`;
 }
 
 function dragProgress(clientX, direction) {
