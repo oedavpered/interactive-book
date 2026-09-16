@@ -129,8 +129,13 @@ function dragProgress(clientX, direction) {
 
 function applyDrag(progressValue, direction) {
   const angle = direction > 0 ? -180 * progressValue : -180 + 180 * progressValue;
-  flipping.style.transform = `translateZ(2px) rotateY(${angle}deg)`;
-  flipping.style.setProperty("--drag-shade", Math.sin(Math.PI * progressValue).toFixed(3));
+  const curl = Math.sin(Math.PI * progressValue);
+  flipping.style.transform = `translateZ(${2 + curl * 5}px) rotateY(${angle}deg) rotateZ(${direction * curl * -.85}deg) scaleY(${1 - curl * .014})`;
+  flipping.style.setProperty("--curl", curl.toFixed(3));
+  flipping.style.setProperty("--curl-radius", `${curl * 24}px`);
+  flipping.style.setProperty("--curl-skew", `${direction * curl * -.5}deg`);
+  flipping.style.setProperty("--curl-scale", (1 - curl * .012).toFixed(4));
+  flipping.style.setProperty("--drag-shade", curl.toFixed(3));
 }
 
 function beginPointerDrag(event, direction) {
