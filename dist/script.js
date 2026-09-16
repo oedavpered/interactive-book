@@ -169,19 +169,14 @@ function endPointerDrag(event) {
   }, duration + 30);
 }
 
-function reactToPointer(event, side) {
+function reactToPointer(event) {
   if (!isOpen || isAnimating) return;
   const rect = event.currentTarget.getBoundingClientRect();
   const x = (event.clientX - rect.left) / rect.width - .5;
-  const y = (event.clientY - rect.top) / rect.height - .5;
-  event.currentTarget.style.setProperty("--hover-turn", `${x * (side === "right" ? -1.6 : 1.6)}deg`);
-  event.currentTarget.style.setProperty("--hover-lift", `${y * -.7}deg`);
-  event.currentTarget.style.filter = `brightness(${1 + Math.abs(x) * .025})`;
+  event.currentTarget.style.filter = `brightness(${1 + Math.abs(x) * .018})`;
 }
 
 function clearPointerReaction(event) {
-  event.currentTarget.style.removeProperty("--hover-turn");
-  event.currentTarget.style.removeProperty("--hover-lift");
   event.currentTarget.style.removeProperty("filter");
 }
 
@@ -224,8 +219,8 @@ rightPage.addEventListener("click", () => turn(1));
 leftPage.addEventListener("click", () => turn(-1));
 rightPage.addEventListener("pointerdown", (event) => beginPointerDrag(event, 1));
 leftPage.addEventListener("pointerdown", (event) => beginPointerDrag(event, -1));
-rightPage.addEventListener("pointermove", (event) => reactToPointer(event, "right"));
-leftPage.addEventListener("pointermove", (event) => reactToPointer(event, "left"));
+rightPage.addEventListener("pointermove", reactToPointer);
+leftPage.addEventListener("pointermove", reactToPointer);
 rightPage.addEventListener("pointerleave", clearPointerReaction);
 leftPage.addEventListener("pointerleave", clearPointerReaction);
 window.addEventListener("pointermove", movePointerDrag, { passive: false });
