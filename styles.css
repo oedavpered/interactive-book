@@ -18,6 +18,7 @@
 @property --curl-radius { syntax: "<length>"; inherits: true; initial-value: 0px; }
 @property --curl-skew { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
 @property --curl-scale { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --drag-shade { syntax: "<number>"; inherits: true; initial-value: 0; }
 
 * { box-sizing: border-box; }
 
@@ -257,7 +258,15 @@ button { font: inherit; }
 .flipping-page { z-index: 20; pointer-events: none; display: none; --curl: 0; --curl-radius: 0px; --curl-skew: 0deg; --curl-scale: 1; }
 .flipping-page.active { display: block; }
 .flipping-page.dragging { transition: none; }
-.flipping-page.settling { transition: transform var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1); }
+.flipping-page.settling {
+  transition:
+    transform var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1),
+    --curl var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1),
+    --curl-radius var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1),
+    --curl-skew var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1),
+    --curl-scale var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1),
+    --drag-shade var(--settle-time, 360ms) cubic-bezier(.65,0,.35,1);
+}
 .flipping-page.forward { animation: flip-forward var(--turn-time) cubic-bezier(.65,0,.35,1) forwards; }
 .flipping-page.backward { transform: translateZ(2px) rotateY(-180deg); animation: flip-backward var(--turn-time) cubic-bezier(.65,0,.35,1) forwards; }
 
