@@ -6,7 +6,7 @@
   --ink: #3e3932;
   --cover: #8b2638;
   --cover-dark: #551522;
-  --turn-time: 820ms;
+  --turn-time: 900ms;
   --open-time: 1050ms;
   font-family: Georgia, "Times New Roman", serif;
 }
@@ -120,12 +120,21 @@ button { font: inherit; }
   animation: book-open-settle var(--open-time) cubic-bezier(.65,0,.35,1) both;
 }
 .book[data-state="open"] { transform: translateX(0); }
+.book[data-state="closing-front"] {
+  animation: book-close-settle var(--open-time) cubic-bezier(.65,0,.35,1) both;
+}
 .book[data-state="back"] { transform: translateX(calc(var(--page-w) / 2)); }
 
 @keyframes book-open-settle {
   0% { transform: translateX(calc(var(--page-w) / -2)) rotateX(0deg) rotateZ(0deg); }
   48% { transform: translateX(-18px) rotateX(1.1deg) rotateZ(.25deg); }
   100% { transform: translateX(0) rotateX(0deg) rotateZ(0deg); }
+}
+
+@keyframes book-close-settle {
+  0% { transform: translateX(0) rotateX(0deg) rotateZ(0deg); }
+  52% { transform: translateX(-18px) rotateX(1deg) rotateZ(.2deg); }
+  100% { transform: translateX(calc(var(--page-w) / -2)) rotateX(0deg) rotateZ(0deg); }
 }
 
 .back-board {
@@ -374,7 +383,13 @@ button { font: inherit; }
 }
 .front-cover.opening.passed-spine { z-index: 4; }
 .front-cover.opening .cover-shade { animation: shade-pulse var(--open-time) ease-in-out; }
-.front-cover.opened { transform: rotateY(-180deg) translateZ(12px); z-index: 3; cursor: default; }
+.front-cover.opened { transform: translateZ(12px) rotateY(-180deg); z-index: 3; cursor: default; }
+.front-cover.opened.closing-front {
+  z-index: 40;
+  cursor: default;
+  animation: close-front var(--open-time) cubic-bezier(.65,0,.35,1) both;
+}
+.front-cover.closing-front .cover-shade { animation: shade-pulse var(--open-time) ease-in-out; }
 
 @keyframes open-cover {
   0% { transform: translateZ(12px) rotateY(0deg) rotateZ(0deg) scaleY(1); }
@@ -382,6 +397,14 @@ button { font: inherit; }
   52% { transform: translateZ(34px) rotateY(-102deg) rotateZ(-.8deg) scaleY(.99); }
   78% { transform: translateZ(22px) rotateY(-160deg) rotateZ(-.25deg) scaleY(.997); }
   100% { transform: translateZ(12px) rotateY(-180deg) rotateZ(0deg) scaleY(1); }
+}
+
+@keyframes close-front {
+  0% { transform: translateZ(12px) rotateY(-180deg) rotateZ(0deg) scaleY(1); }
+  22% { transform: translateZ(22px) rotateY(-160deg) rotateZ(-.25deg) scaleY(.997); }
+  48% { transform: translateZ(34px) rotateY(-102deg) rotateZ(-.8deg) scaleY(.99); }
+  78% { transform: translateZ(24px) rotateY(-28deg) rotateZ(-.2deg) scaleY(.997); }
+  100% { transform: translateZ(12px) rotateY(0deg) rotateZ(0deg) scaleY(1); }
 }
 
 .gutter {

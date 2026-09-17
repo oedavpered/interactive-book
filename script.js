@@ -31,6 +31,7 @@ let suppressClickUntil = 0;
 const spreadCount = pages.length / 2;
 const OPEN_TIME = 1050;
 const COVER_PASS_TIME = Math.round(OPEN_TIME * .5);
+const TURN_TIME = 900;
 
 function pageMarkup(page) {
   if (!page) return "";
@@ -81,25 +82,28 @@ function turn(direction) {
     closeToBack();
     return;
   }
-  if (next < 0) return;
+  if (next < 0) {
+    closeToFront();
+    return;
+  }
   isAnimating = true;
 
-  if (direction > 0) {
-    flipFront.innerHTML = pageMarkup(pages[spread * 2 + 1]);
-    flipBack.innerHTML = pageMarkup(pages[next * 2]);
-  } else {
-    flipFront.innerHTML = pageMarkup(pages[next * 2 + 1]);
-    flipBack.innerHTML = pageMarkup(pages[spread * 2]);
-  }
-  stageTargetUnderlay(direction, next);
-  flipping.className = `flipping-page active ${direction > 0 ? "forward" : "backward"}`;
+  prepareFlip(direction);
+  applyDrag(0, direction);
+  flipping.classList.remove("dragging");
+  flipping.classList.add("settling");
+  flipping.style.setProperty("--settle-time", `${TURN_TIME}ms`);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => applyDrag(1, direction));
+  });
 
   window.setTimeout(() => {
     spread = next;
     renderSpread();
     flipping.className = "flipping-page";
+    flipping.removeAttribute("style");
     isAnimating = false;
-  }, 820);
+  }, TURN_TIME + 30);
 }
 
 function stageTargetUnderlay(direction, next) {
@@ -216,6 +220,23 @@ function closeToBack() {
   }, 900);
 }
 
+function closeToFront() {
+  if (!isOpen || isAnimating || spread !== 0) return;
+  isAnimating = true;
+  hint.style.opacity = "0";
+  book.dataset.state = "closing-front";
+  cover.classList.add("closing-front");
+  window.setTimeout(() => {
+    cover.classList.remove("opened", "closing-front");
+    book.dataset.state = "closed";
+    isOpen = false;
+    isAnimating = false;
+    progress.textContent = "";
+    hint.textContent = "Нажмите на обложку, чтобы открыть книгу";
+    hint.style.opacity = "1";
+  }, OPEN_TIME);
+}
+
 function reopenFromBack() {
   if (book.dataset.state !== "back" || isAnimating) return;
   isAnimating = true;
@@ -236,7 +257,10 @@ function resizeBook() {
 cover.addEventListener("click", openBook);
 backCover.addEventListener("click", reopenFromBack);
 rightPage.addEventListener("click", () => turn(1));
-leftPage.addEventListener("click", () => turn(-1));
+leftPage.addEventListener("click", () => {
+  if (spread === 0 && isOpen) closeToFront();
+  else turn(-1);
+});
 rightPage.addEventListener("pointerdown", (event) => beginPointerDrag(event, 1));
 leftPage.addEventListener("pointerdown", (event) => beginPointerDrag(event, -1));
 rightPage.addEventListener("pointermove", reactToPointer);
@@ -247,12 +271,21 @@ window.addEventListener("pointermove", movePointerDrag, { passive: false });
 window.addEventListener("pointerup", endPointerDrag);
 window.addEventListener("pointercancel", endPointerDrag);
 window.addEventListener("keydown", (event) => {
+  if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && event.repeat) return;
   if (event.key === "ArrowLeft" && book.dataset.state === "back") {
+    event.preventDefault();
     reopenFromBack();
     return;
   }
-  if (event.key === "ArrowRight") turn(1);
-  if (event.key === "ArrowLeft") turn(-1);
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    turn(1);
+  }
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    if (spread === 0 && isOpen) closeToFront();
+    else turn(-1);
+  }
   if ((event.key === "Enter" || event.key === " ") && !isOpen) openBook();
 });
 window.addEventListener("resize", resizeBook);
