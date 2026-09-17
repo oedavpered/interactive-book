@@ -3,6 +3,8 @@
   --book-w: min(43vw, 390px);
   --book-h: calc(var(--book-w) * 1.38);
   --progress: 0;
+  --cover-turn: 0;
+  --center-shift: 0;
   font-family: "Helvetica Neue", Arial, sans-serif;
 }
 * { box-sizing: border-box; }
@@ -29,13 +31,12 @@ body {
 }
 .book {
   position: relative; width: var(--book-w); height: var(--book-h); transform-style: preserve-3d;
-  transform: translateX(calc(var(--progress) * var(--book-w) * .48))
-    rotateX(calc(3deg - var(--progress) * 2deg)) rotateZ(calc(var(--progress) * -1.5deg));
+  transform: translateX(calc(var(--center-shift) * var(--book-w)));
 }
 .floor-shadow {
   position: absolute;
-  width: calc(var(--book-w) * (1.05 + var(--progress) * .85)); height: calc(var(--book-h) * .18);
-  left: 50%; top: 77%; transform: translateX(calc(-50% + var(--progress) * -12%));
+  width: calc(var(--book-w) * (1.05 + var(--cover-turn) * .85)); height: calc(var(--book-h) * .18);
+  left: 50%; top: 77%; transform: translateX(-50%);
   border-radius: 50%; background: rgba(31,40,44,calc(.12 + var(--progress) * .05));
   filter: blur(24px);
 }
@@ -46,7 +47,7 @@ body {
 .back-cover {
   background: linear-gradient(100deg,#cfd4d5,#e8eaea 11%,#c7ccce 98%);
   box-shadow: 0 10px 16px rgba(42,53,58,.11), inset 0 0 0 1px rgba(133,143,147,.17);
-  transform: translateZ(-12px);
+  transform: translateZ(-18px);
 }
 .page-stack {
   inset: 5px 3px 5px 9px; border-radius: 5px 12px 12px 5px;
@@ -69,15 +70,15 @@ body {
   background: linear-gradient(90deg,rgba(81,94,99,.13),transparent 15% 84%,rgba(255,255,255,.78));
   opacity: calc(.13 + var(--turn) * .2);
 }
-.page-1 { --turn: clamp(0,calc(var(--progress) * 5 - 0),1); transform: translateZ(5px) rotateY(calc(var(--turn) * -178deg)); }
-.page-2 { --turn: clamp(0,calc(var(--progress) * 5 - 1),1); transform: translateZ(3px) rotateY(calc(var(--turn) * -178deg)); }
-.page-3 { --turn: clamp(0,calc(var(--progress) * 5 - 2),1); transform: translateZ(1px) rotateY(calc(var(--turn) * -178deg)); }
-.page-4 { --turn: clamp(0,calc(var(--progress) * 5 - 3),1); transform: translateZ(-1px) rotateY(calc(var(--turn) * -178deg)); }
+.page-1 { --turn: clamp(0,calc(var(--progress) * 5 - 1),1); transform: translateZ(calc(8px - var(--turn) * 6px)) rotateY(calc(var(--turn) * -178deg)); }
+.page-2 { --turn: clamp(0,calc(var(--progress) * 5 - 2),1); transform: translateZ(calc(6px - var(--turn) * 2px)) rotateY(calc(var(--turn) * -178deg)); }
+.page-3 { --turn: clamp(0,calc(var(--progress) * 5 - 3),1); transform: translateZ(calc(4px + var(--turn) * 2px)) rotateY(calc(var(--turn) * -178deg)); }
+.page-4 { --turn: clamp(0,calc(var(--progress) * 5 - 4),1); transform: translateZ(calc(2px + var(--turn) * 6px)) rotateY(calc(var(--turn) * -178deg)); }
 .cover {
   z-index: 10; display: grid; place-items: center;
   background: linear-gradient(120deg,#d9dcdd 0,#eceeee 17%,#d4d7d8 74%,#c3c8ca 100%);
   box-shadow: 6px 10px 15px rgba(45,54,58,.13), inset 0 0 0 1px rgba(133,143,147,.15);
-  transform: translateZ(8px) rotateY(calc(clamp(0,calc(var(--progress) * 5),1) * -178deg));
+  transform: translateZ(calc(10px - var(--cover-turn) * 24px)) rotateY(calc(var(--cover-turn) * -178deg));
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .cover::after {
@@ -101,7 +102,9 @@ body {
   position: absolute; z-index: 20; left: 2px; top: 1.5%; width: 3.8%; height: 97%;
   border-radius: 5px;
   background: linear-gradient(90deg,rgba(117,127,130,.32),rgba(255,255,255,.5),rgba(117,127,130,.13));
-  transform: translateZ(10px); pointer-events: none;
+  opacity: clamp(0,calc(1 - var(--cover-turn) * 2.2),1);
+  transform: translateZ(calc(10px - var(--cover-turn) * 30px));
+  pointer-events: none;
 }
 .instruction, .scroll-cue {
   position: absolute; z-index: 30; margin: 0; font-size: 10px; line-height: 1.7;
@@ -113,7 +116,7 @@ body {
 body.has-scrolled .scroll-cue { opacity: 0; }
 @media (max-width: 700px) {
   :root { --book-w: min(67vw,330px); }
-  .book-wrap { width: 100vw; transform: translate(-3vw,-3vh); }
+  .book-wrap { width: 100vw; transform: translateY(-3vh); }
   .scroll-cue { top: auto; right: 22px; bottom: 15vh; writing-mode: vertical-rl; }
   .instruction { bottom: 5.5vh; }
 }
