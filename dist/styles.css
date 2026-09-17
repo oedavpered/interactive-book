@@ -76,20 +76,33 @@ body {
 .page-4 { --turn: clamp(0,calc(var(--progress) * 5 - 4),1); transform: translateZ(calc(2px + var(--turn) * 6px)) rotateY(calc(var(--turn) * -178deg)); }
 .cover {
   z-index: 10; display: grid; place-items: center;
-  background: linear-gradient(120deg,#d9dcdd 0,#eceeee 17%,#d4d7d8 74%,#c3c8ca 100%);
-  box-shadow: 6px 10px 15px rgba(45,54,58,.13), inset 0 0 0 1px rgba(133,143,147,.15);
+  background: transparent;
   transform: translateZ(calc(10px - var(--cover-turn) * 24px)) rotateY(calc(var(--cover-turn) * -178deg));
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  backface-visibility: visible; -webkit-backface-visibility: visible;
 }
+.cover::before,
 .cover::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
-  background: linear-gradient(110deg,rgba(255,255,255,.22),transparent 40%,rgba(63,72,76,.13));
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.cover::before {
+  background:
+    linear-gradient(110deg,rgba(255,255,255,.22),transparent 40%,rgba(63,72,76,.13)),
+    linear-gradient(120deg,#d9dcdd 0,#eceeee 17%,#d4d7d8 74%,#c3c8ca 100%);
+  box-shadow: 6px 10px 15px rgba(45,54,58,.13), inset 0 0 0 1px rgba(133,143,147,.15);
+  transform: translateZ(.5px);
+}
+.cover::after {
+  background: linear-gradient(105deg,#c7cccd 0,#e2e5e5 18%,#d4d8d9 82%,#bcc2c4 100%);
+  box-shadow: -6px 10px 15px rgba(45,54,58,.11), inset 0 0 0 1px rgba(123,135,140,.18), inset 14px 0 24px rgba(91,103,108,.08);
+  transform: rotateY(180deg) translateZ(.5px);
 }
 .cover-inset {
-  position: absolute; inset: 4.5%; border-radius: 11px;
+  position: absolute; z-index: 1; inset: 4.5%; border-radius: 11px;
   box-shadow: inset 0 0 0 1px rgba(143,151,154,.11), inset 0 12px 22px rgba(255,255,255,.18);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
-.mark { position: relative; width: 33%; aspect-ratio: 1; opacity: .22; transform: rotate(45deg); }
+.mark { position: relative; z-index: 1; width: 33%; aspect-ratio: 1; opacity: .22; transform: rotate(45deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .mark i {
   position: absolute; width: 48%; height: 48%; border: max(2px,.35vw) solid #879094;
   border-radius: 50% 50% 8% 50%;
