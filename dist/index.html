@@ -3,35 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f8f8f6" />
-    <meta name="description" content="Пустая интерактивная веб-книга с перелистыванием." />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23eef0f0'/%3E%3Cpath d='M14 12h27a9 9 0 0 1 9 9v31H23a9 9 0 0 1-9-9V12Z' fill='%23d9dcdd' stroke='%2393a0a8' stroke-width='3'/%3E%3Cpath d='M23 14v36' stroke='%23ffffff' stroke-width='2'/%3E%3C/svg%3E" />
-    <title>Книга</title>
+    <meta name="theme-color" content="#1d211f" />
+    <meta name="description" content="Интерактивная веб-книга с реалистичным перелистыванием страниц." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%238d2637'/%3E%3Cpath d='M14 17c8-2 14 0 18 5 4-5 10-7 18-5v32c-8-2-14 0-18 5-4-5-10-7-18-5V17z' fill='%23f4ead8'/%3E%3Cpath d='M32 22v32' stroke='%23691b2a' stroke-width='2'/%3E%3C/svg%3E" />
+    <title>Тихие страницы</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="scroll-track" aria-label="Пустая интерактивная книга">
-      <section class="scene">
-        <div class="halo" aria-hidden="true"></div>
-        <div class="book-wrap">
-          <div class="floor-shadow" aria-hidden="true"></div>
-          <div class="book" id="book" aria-label="Книга; прокручивайте, чтобы листать">
-            <div class="back-cover" aria-hidden="true"></div>
-            <div class="page-stack" aria-hidden="true"></div>
-            <div class="page page-4" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
-            <div class="page page-3" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
-            <div class="page page-2" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
-            <div class="page page-1" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
-            <div class="cover" aria-hidden="true">
-              <span class="cover-inset"></span>
-              <span class="mark"><i></i><i></i><i></i><i></i></span>
-            </div>
-            <div class="spine" aria-hidden="true"></div>
+    <main class="scene" aria-label="Интерактивная книга">
+      <div class="scene-glow" aria-hidden="true"></div>
+      <p class="hint" id="hint">Нажмите на обложку, чтобы открыть книгу</p>
+      <div class="book-stage" id="bookStage">
+        <div class="book-shadow" aria-hidden="true"></div>
+        <div class="book" id="book" data-state="closed">
+          <div class="back-board" aria-hidden="true"></div>
+          <button class="cover back-cover" id="backCover" aria-label="Вернуться к последнему развороту">
+            <span class="cover-edge" aria-hidden="true"></span>
+            <span class="back-cover-content"><span>✦</span><small>Конец альбома</small></span>
+            <i class="cover-shade" aria-hidden="true"></i>
+          </button>
+          <div class="page-stack left-stack" id="leftStack" aria-hidden="true"></div>
+          <div class="page-stack right-stack" id="rightStack" aria-hidden="true"></div>
+
+          <button class="page static-page left-page" id="leftPage" aria-label="Предыдущая страница">
+            <span class="paper-content"></span>
+          </button>
+          <button class="page static-page right-page" id="rightPage" aria-label="Следующая страница">
+            <span class="paper-content"></span>
+          </button>
+
+          <div class="flipping-page" id="flippingPage" aria-hidden="true">
+            <div class="face face-front"><span class="paper-content"></span><i class="turn-shade"></i></div>
+            <div class="face face-back"><span class="paper-content"></span><i class="turn-shade"></i></div>
           </div>
+
+          <button class="cover front-cover" id="frontCover" aria-label="Открыть книгу">
+            <span class="cover-edge" aria-hidden="true"></span>
+            <span class="cover-inside" aria-hidden="true"><i></i></span>
+            <span class="cover-content">
+              <small>Небольшой альбом</small>
+              <span class="cover-mark" aria-hidden="true">✦</span>
+              <strong>ТИХИЕ<br />СТРАНИЦЫ</strong>
+              <em>собрание моментов</em>
+            </span>
+            <i class="cover-shade" aria-hidden="true"></i>
+          </button>
+
+          <div class="gutter" aria-hidden="true"></div>
         </div>
-        <p class="instruction">КЛИК · КОЛЕСО · СВАЙП</p>
-        <span class="scroll-cue" aria-hidden="true">ЛИСТАЙ ВНИЗ<br><b>↓</b></span>
-      </section>
+      </div>
+      <div class="progress" id="progress" aria-live="polite"></div>
     </main>
     <script src="./script.js"></script>
   </body>
