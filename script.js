@@ -31,6 +31,7 @@ let suppressClickUntil = 0;
 const spreadCount = pages.length / 2;
 const OPEN_TIME = 1050;
 const COVER_PASS_TIME = Math.round(OPEN_TIME * .5);
+const FRONT_SURFACE_TIME = Math.round(OPEN_TIME * .5);
 const TURN_TIME = 900;
 
 function pageMarkup(page) {
@@ -227,7 +228,10 @@ function closeToFront() {
   book.dataset.state = "closing-front";
   cover.classList.add("closing-front");
   window.setTimeout(() => {
-    cover.classList.remove("opened", "closing-front");
+    if (book.dataset.state === "closing-front") cover.classList.add("front-surface");
+  }, FRONT_SURFACE_TIME);
+  window.setTimeout(() => {
+    cover.classList.remove("opened", "closing-front", "front-surface");
     book.dataset.state = "closed";
     isOpen = false;
     isAnimating = false;
