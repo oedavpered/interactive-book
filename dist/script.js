@@ -12,7 +12,12 @@ function scrollProgress() {
 function paint() {
   progress += (target - progress) * 0.12;
   if (Math.abs(target - progress) < 0.0005) progress = target;
+  const coverTurn = Math.min(1, progress * 5);
+  const centeringPhase = Math.max(0, Math.min(1, (coverTurn - .5) * 2));
+  const smoothCentering = centeringPhase * centeringPhase * (3 - 2 * centeringPhase);
   root.style.setProperty("--progress", progress.toFixed(4));
+  root.style.setProperty("--cover-turn", coverTurn.toFixed(4));
+  root.style.setProperty("--center-shift", (.46 * smoothCentering).toFixed(4));
   document.body.classList.toggle("has-scrolled", progress > 0.025);
   if (progress !== target) raf = requestAnimationFrame(paint);
   else raf = 0;
