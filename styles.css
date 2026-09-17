@@ -141,7 +141,8 @@ button { font: inherit; }
 .book[data-state="back"] .back-board { right: 50%; }
 .book[data-state="closed"] .left-page,
 .book[data-state="closed"] .left-stack,
-.book[data-state="closed"] .right-page { visibility: hidden; }
+.book[data-state="closed"] .right-page,
+.book[data-state="closed"] .gutter { visibility: hidden; }
 .book[data-state="opening"] .left-page,
 .book[data-state="opening"] .left-stack { animation: reveal-left-page var(--open-time) cubic-bezier(.65,0,.35,1) both; }
 @keyframes reveal-left-page {
@@ -260,7 +261,8 @@ button { font: inherit; }
 .book[data-state="back"] .back-cover { display: block; transform: rotateY(0); }
 .book[data-state="back"] .static-page,
 .book[data-state="back"] .page-stack,
-.book[data-state="back"] .front-cover { visibility: hidden; }
+.book[data-state="back"] .front-cover,
+.book[data-state="back"] .gutter { visibility: hidden; }
 @keyframes close-back { from { transform: rotateY(-180deg); } to { transform: rotateY(0); } }
 
 .flipping-page { z-index: 20; pointer-events: none; display: none; --curl: 0; --curl-radius: 0px; --curl-skew: 0deg; --curl-scale: 1; }
@@ -381,6 +383,22 @@ button { font: inherit; }
   78% { transform: translateZ(22px) rotateY(-160deg) rotateZ(-.25deg) scaleY(.997); }
   100% { transform: translateZ(12px) rotateY(-180deg) rotateZ(0deg) scaleY(1); }
 }
+
+.gutter {
+  position: absolute;
+  z-index: 30;
+  top: 0;
+  left: 50%;
+  width: 26px;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(54,39,23,.23) 42%, rgba(37,26,14,.34) 50%, rgba(54,39,23,.22) 58%, transparent);
+  transition: opacity .4s ease;
+}
+.book[data-state="opening"] .gutter,
+.book[data-state="open"] .gutter { opacity: 1; }
 
 .progress {
   position: fixed;
