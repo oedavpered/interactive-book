@@ -7,6 +7,7 @@
   --cover: #8b2638;
   --cover-dark: #551522;
   --turn-time: 820ms;
+  --open-time: 1050ms;
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -112,11 +113,20 @@ button { font: inherit; }
   height: var(--page-h);
   transform-style: preserve-3d;
   transform: translateX(calc(var(--page-w) / -2));
-  transition: transform 900ms cubic-bezier(.65,0,.35,1);
+  transition: transform var(--open-time) cubic-bezier(.65,0,.35,1);
 }
 
-.book[data-state="opening"], .book[data-state="open"] { transform: translateX(0); }
+.book[data-state="opening"] {
+  animation: book-open-settle var(--open-time) cubic-bezier(.65,0,.35,1) both;
+}
+.book[data-state="open"] { transform: translateX(0); }
 .book[data-state="back"] { transform: translateX(calc(var(--page-w) / 2)); }
+
+@keyframes book-open-settle {
+  0% { transform: translateX(calc(var(--page-w) / -2)) rotateX(0deg) rotateZ(0deg); }
+  48% { transform: translateX(-18px) rotateX(1.1deg) rotateZ(.25deg); }
+  100% { transform: translateX(0) rotateX(0deg) rotateZ(0deg); }
+}
 
 .back-board {
   position: absolute;
@@ -134,10 +144,10 @@ button { font: inherit; }
 .book[data-state="closed"] .right-page,
 .book[data-state="closed"] .gutter { visibility: hidden; }
 .book[data-state="opening"] .left-page,
-.book[data-state="opening"] .left-stack { animation: reveal-left-page 900ms cubic-bezier(.65,0,.35,1) both; }
+.book[data-state="opening"] .left-stack { animation: reveal-left-page var(--open-time) cubic-bezier(.65,0,.35,1) both; }
 @keyframes reveal-left-page {
-  0%, 43% { opacity: 0; }
-  56%, 100% { opacity: 1; }
+  0%, 38% { opacity: 0; }
+  52%, 100% { opacity: 1; }
 }
 
 .page-stack {
@@ -358,9 +368,21 @@ button { font: inherit; }
 .cover-mark { margin-bottom: 18px; font-size: 15px; }
 .cover-shade { position: absolute; inset: 0; border-radius: inherit; opacity: 0; background: linear-gradient(90deg, transparent, rgba(0,0,0,.55)); pointer-events: none; }
 
-.front-cover.opening { transform: rotateY(-180deg) translateZ(12px); box-shadow: -8px 10px 18px rgba(0,0,0,.28); }
-.front-cover.opening .cover-shade { animation: shade-pulse 900ms ease-in-out; }
+.front-cover.opening {
+  animation: open-cover var(--open-time) cubic-bezier(.65,0,.35,1) both;
+  box-shadow: -8px 10px 18px rgba(0,0,0,.28);
+}
+.front-cover.opening.passed-spine { z-index: 4; }
+.front-cover.opening .cover-shade { animation: shade-pulse var(--open-time) ease-in-out; }
 .front-cover.opened { transform: rotateY(-180deg) translateZ(12px); z-index: 3; cursor: default; }
+
+@keyframes open-cover {
+  0% { transform: translateZ(12px) rotateY(0deg) rotateZ(0deg) scaleY(1); }
+  22% { transform: translateZ(24px) rotateY(-28deg) rotateZ(-.2deg) scaleY(.997); }
+  52% { transform: translateZ(34px) rotateY(-102deg) rotateZ(-.8deg) scaleY(.99); }
+  78% { transform: translateZ(22px) rotateY(-160deg) rotateZ(-.25deg) scaleY(.997); }
+  100% { transform: translateZ(12px) rotateY(-180deg) rotateZ(0deg) scaleY(1); }
+}
 
 .gutter {
   position: absolute;
@@ -399,6 +421,6 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root { --turn-time: 1ms; }
+  :root { --turn-time: 1ms; --open-time: 1ms; }
   .book, .front-cover, .book-shadow { transition-duration: 1ms; }
 }

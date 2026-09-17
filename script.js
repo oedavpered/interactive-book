@@ -29,6 +29,8 @@ let isAnimating = false;
 let drag = null;
 let suppressClickUntil = 0;
 const spreadCount = pages.length / 2;
+const OPEN_TIME = 1050;
+const COVER_PASS_TIME = Math.round(OPEN_TIME * .5);
 
 function pageMarkup(page) {
   if (!page) return "";
@@ -57,7 +59,10 @@ function openBook() {
     requestAnimationFrame(() => { book.dataset.state = "opening"; });
   });
   window.setTimeout(() => {
-    cover.classList.remove("opening");
+    if (book.dataset.state === "opening") cover.classList.add("passed-spine");
+  }, COVER_PASS_TIME);
+  window.setTimeout(() => {
+    cover.classList.remove("opening", "passed-spine");
     cover.classList.add("opened");
     book.dataset.state = "open";
     isOpen = true;
@@ -65,7 +70,7 @@ function openBook() {
     hint.textContent = "Потяните страницу за край или используйте клавиши ← →";
     hint.style.opacity = "1";
     renderSpread();
-  }, 900);
+  }, OPEN_TIME);
 }
 
 function turn(direction) {
