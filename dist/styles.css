@@ -78,6 +78,7 @@ body {
   background: linear-gradient(120deg,#d9dcdd 0,#eceeee 17%,#d4d7d8 74%,#c3c8ca 100%);
   box-shadow: 6px 10px 15px rgba(45,54,58,.13), inset 0 0 0 1px rgba(133,143,147,.15);
   transform: translateZ(8px) rotateY(calc(clamp(0,calc(var(--progress) * 5),1) * -178deg));
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .cover::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
