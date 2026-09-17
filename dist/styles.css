@@ -383,10 +383,11 @@ button { font: inherit; }
 }
 .front-cover.opening.passed-spine { z-index: 4; }
 .front-cover.opening .cover-shade { animation: shade-pulse var(--open-time) ease-in-out; }
-.front-cover.opened { transform: translateZ(12px) rotateY(-180deg); z-index: 3; cursor: default; }
+.front-cover.opened { transform: translateZ(12px) rotateY(-180deg); z-index: 3; cursor: default; visibility: hidden; }
 .front-cover.opened.closing-front {
   z-index: 40;
   cursor: default;
+  visibility: visible;
   background: transparent;
   box-shadow: -8px 10px 18px rgba(0,0,0,.28);
   animation: close-front var(--open-time) cubic-bezier(.65,0,.35,1) both;
