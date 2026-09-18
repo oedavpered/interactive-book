@@ -18,8 +18,6 @@ body {
   position: sticky; top: 0; height: 100vh; min-height: 540px; overflow: hidden;
   display: grid; place-items: center; perspective: 1800px;
   background-color: #fafaf8;
-  background-image: radial-gradient(circle, rgba(72,166,232,.66) 1.35px, transparent 1.6px);
-  background-size: 24px 24px;
 }
 .halo {
   position: absolute; inset: 0;
