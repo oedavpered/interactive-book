@@ -25,10 +25,13 @@
               <div class="page-face page-front" data-bg-color="rose" data-bg-pattern="dots">
                 <section class="keeper-profile" aria-label="Анкета хранителя дневника">
                   <header class="keeper-header">
-                    <div class="avatar-slot" aria-label="Место для фотографии">
-                      <span aria-hidden="true">+</span>
-                      <small>ФОТО</small>
-                    </div>
+                    <button type="button" class="avatar-slot" data-photo-shape="rectangle" aria-label="Добавить фотографию" disabled>
+                      <svg class="avatar-outline" viewBox="0 0 120 90" preserveAspectRatio="none" aria-hidden="true">
+                        <rect x="2" y="2" width="116" height="86" rx="15"></rect>
+                      </svg>
+                      <span class="avatar-empty" aria-hidden="true"><b>+</b><small>ФОТО</small></span>
+                      <img class="avatar-image" alt="Фотография хранителя дневника" />
+                    </button>
                     <div class="keeper-heading">
                       <p>ХРАНИТЕЛЬ ДНЕВНИКА</p>
                       <h1>Это я</h1>
@@ -82,6 +85,48 @@
         <span class="scroll-cue" aria-hidden="true">ЛИСТАЙ ВНИЗ<br><b>↓</b></span>
       </section>
     </main>
+    <dialog class="photo-editor" aria-labelledby="photo-editor-title">
+      <div class="photo-editor-card">
+        <header class="photo-editor-header">
+          <div>
+            <p>ФОТОГРАФИЯ</p>
+            <h2 id="photo-editor-title">Добавить фото</h2>
+          </div>
+          <button class="photo-editor-close" type="button" aria-label="Закрыть редактор">×</button>
+        </header>
+        <div class="photo-workspace">
+          <div class="crop-stage">
+            <div class="crop-frame" data-photo-shape="rectangle">
+              <img class="crop-image" alt="Предпросмотр фотографии" />
+              <div class="crop-empty">Выберите фотографию</div>
+            </div>
+            <p class="crop-hint">Перетаскивайте фото, чтобы выбрать кадр</p>
+          </div>
+          <div class="photo-settings">
+            <label class="photo-upload">
+              <input class="photo-file" type="file" accept="image/*" />
+              <span>Выбрать фото</span>
+            </label>
+            <fieldset class="shape-picker">
+              <legend>Форма</legend>
+              <div class="shape-options">
+                <button type="button" data-shape="rectangle" aria-pressed="true"><i class="shape-icon shape-rectangle" aria-hidden="true"></i><span>Прямоугольник</span></button>
+                <button type="button" data-shape="circle" aria-pressed="false"><i class="shape-icon shape-circle" aria-hidden="true"></i><span>Круг</span></button>
+                <button type="button" data-shape="heart" aria-pressed="false"><i class="shape-icon shape-heart" aria-hidden="true"></i><span>Сердце</span></button>
+              </div>
+            </fieldset>
+            <label class="zoom-control">
+              <span>Масштаб</span>
+              <input class="photo-zoom" type="range" min="1" max="3" step="0.01" value="1" />
+            </label>
+          </div>
+        </div>
+        <footer class="photo-editor-actions">
+          <button class="photo-cancel" type="button">Отмена</button>
+          <button class="photo-apply" type="button" disabled>Готово</button>
+        </footer>
+      </div>
+    </dialog>
     <script src="./script.js"></script>
   </body>
 </html>

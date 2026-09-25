@@ -7,12 +7,27 @@ const ownerPage = document.querySelector(".page-1 .page-front");
 const ownerFields = document.querySelectorAll(".keeper-profile input, .keeper-profile textarea, .keeper-profile button");
 const backgroundButtons = document.querySelectorAll(".background-choice");
 const backgroundStorageKey = "friendship-diary-background";
+const avatarSlot = document.querySelector(".avatar-slot");
+const avatarImage = document.querySelector(".avatar-image");
+const photoEditor = document.querySelector(".photo-editor");
+const photoEditorClose = document.querySelector(".photo-editor-close");
+const photoCancel = document.querySelector(".photo-cancel");
+const photoApply = document.querySelector(".photo-apply");
+const photoFile = document.querySelector(".photo-file");
+const cropFrame = document.querySelector(".crop-frame");
+const cropImage = document.querySelector(".crop-image");
+const cropEmpty = document.querySelector(".crop-empty");
+const photoZoom = document.querySelector(".photo-zoom");
+const shapeButtons = document.querySelectorAll(".shape-picker button");
 let progress = 0;
 let target = 0;
 let raf = 0;
 let isFocused = false;
 let focusScrollY = 0;
 let focusProgress = 0;
+let appliedPhoto = { src: "", shape: "rectangle", zoom: 1, x: 0, y: 0 };
+let draftPhoto = { ...appliedPhoto };
+let dragStart = null;
 
 function scrollProgress() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -77,6 +92,108 @@ try {
 } catch {
   applyBackground("rose", "dots", false);
 }
+
+function setPhotoTransform(element, state) {
+  element.style.setProperty("--photo-x", `${state.x}%`);
+  element.style.setProperty("--photo-y", `${state.y}%`);
+  element.style.setProperty("--photo-zoom", state.zoom);
+}
+
+function renderPhotoEditor() {
+  cropFrame.dataset.photoShape = draftPhoto.shape;
+  cropImage.src = draftPhoto.src;
+  cropImage.hidden = !draftPhoto.src;
+  cropEmpty.hidden = Boolean(draftPhoto.src);
+  photoApply.disabled = !draftPhoto.src;
+  photoZoom.value = draftPhoto.zoom;
+  photoZoom.disabled = !draftPhoto.src;
+  setPhotoTransform(cropImage, draftPhoto);
+  shapeButtons.forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.shape === draftPhoto.shape));
+  });
+}
+
+function openPhotoEditor() {
+  draftPhoto = { ...appliedPhoto };
+  renderPhotoEditor();
+  photoEditor.showModal();
+}
+
+function closePhotoEditor() {
+  photoEditor.close();
+}
+
+avatarSlot.addEventListener("click", openPhotoEditor);
+photoEditorClose.addEventListener("click", closePhotoEditor);
+photoCancel.addEventListener("click", closePhotoEditor);
+photoEditor.addEventListener("click", (event) => {
+  if (event.target === photoEditor) closePhotoEditor();
+});
+
+photoFile.addEventListener("change", () => {
+  const file = photoFile.files?.[0];
+  if (!file || !file.type.startsWith("image/")) return;
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    draftPhoto = { ...draftPhoto, src: String(reader.result), zoom: 1, x: 0, y: 0 };
+    renderPhotoEditor();
+    photoFile.value = "";
+  });
+  reader.readAsDataURL(file);
+});
+
+shapeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    draftPhoto.shape = button.dataset.shape;
+    renderPhotoEditor();
+  });
+});
+
+photoZoom.addEventListener("input", () => {
+  draftPhoto.zoom = Number(photoZoom.value);
+  const limit = (draftPhoto.zoom - 1) * 30;
+  draftPhoto.x = Math.max(-limit, Math.min(limit, draftPhoto.x));
+  draftPhoto.y = Math.max(-limit, Math.min(limit, draftPhoto.y));
+  setPhotoTransform(cropImage, draftPhoto);
+});
+
+cropFrame.addEventListener("pointerdown", (event) => {
+  if (!draftPhoto.src) return;
+  dragStart = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, photoX: draftPhoto.x, photoY: draftPhoto.y };
+  cropFrame.setPointerCapture(event.pointerId);
+  cropFrame.classList.add("is-dragging");
+});
+
+cropFrame.addEventListener("pointermove", (event) => {
+  if (!dragStart || dragStart.pointerId !== event.pointerId) return;
+  const bounds = cropFrame.getBoundingClientRect();
+  const limit = (draftPhoto.zoom - 1) * 30;
+  const nextX = dragStart.photoX + ((event.clientX - dragStart.x) / bounds.width) * 100;
+  const nextY = dragStart.photoY + ((event.clientY - dragStart.y) / bounds.height) * 100;
+  draftPhoto.x = Math.max(-limit, Math.min(limit, nextX));
+  draftPhoto.y = Math.max(-limit, Math.min(limit, nextY));
+  setPhotoTransform(cropImage, draftPhoto);
+});
+
+function finishPhotoDrag(event) {
+  if (!dragStart || dragStart.pointerId !== event.pointerId) return;
+  dragStart = null;
+  cropFrame.classList.remove("is-dragging");
+}
+
+cropFrame.addEventListener("pointerup", finishPhotoDrag);
+cropFrame.addEventListener("pointercancel", finishPhotoDrag);
+
+photoApply.addEventListener("click", () => {
+  if (!draftPhoto.src) return;
+  appliedPhoto = { ...draftPhoto };
+  avatarImage.src = appliedPhoto.src;
+  avatarSlot.dataset.hasPhoto = "true";
+  avatarSlot.dataset.photoShape = appliedPhoto.shape;
+  avatarSlot.setAttribute("aria-label", "Изменить фотографию");
+  setPhotoTransform(avatarImage, appliedPhoto);
+  closePhotoEditor();
+});
 
 function enterFocus() {
   if (isFocused || progress < .18 || Math.abs(progress - target) > .008) return;
