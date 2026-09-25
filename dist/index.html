@@ -30,7 +30,11 @@
                         <rect x="2" y="2" width="86" height="116" rx="15"></rect>
                       </svg>
                       <span class="avatar-empty" aria-hidden="true"><b>+</b><small>ФОТО</small></span>
-                      <img class="avatar-image" alt="Фотография хранителя дневника" />
+                      <span class="avatar-photo-frame" aria-hidden="true">
+                        <span class="avatar-photo-window">
+                          <img class="avatar-image" alt="Фотография хранителя дневника" />
+                        </span>
+                      </span>
                     </button>
                     <div class="keeper-heading">
                       <p>ХРАНИТЕЛЬ ДНЕВНИКА</p>
@@ -98,8 +102,10 @@
         <div class="photo-workspace">
           <div class="crop-stage">
             <div class="crop-frame" data-photo-shape="rectangle">
-              <img class="crop-image" alt="Предпросмотр фотографии" />
-              <div class="crop-empty">Выберите фотографию</div>
+              <div class="crop-window">
+                <img class="crop-image" alt="Предпросмотр фотографии" />
+                <div class="crop-empty">Выберите фотографию</div>
+              </div>
             </div>
             <p class="crop-hint" id="photo-editor-hint">Перетаскивайте фото, чтобы выбрать кадр</p>
           </div>
@@ -114,6 +120,7 @@
                 <button type="button" data-shape="rectangle" aria-pressed="true"><i class="shape-icon shape-rectangle" aria-hidden="true"></i><span>Прямоугольник</span></button>
                 <button type="button" data-shape="circle" aria-pressed="false"><i class="shape-icon shape-circle" aria-hidden="true"></i><span>Круг</span></button>
                 <button type="button" data-shape="heart" aria-pressed="false"><i class="shape-icon shape-heart" aria-hidden="true"></i><span>Сердце</span></button>
+                <button type="button" data-shape="instax" aria-pressed="false"><i class="shape-icon shape-instax" aria-hidden="true"></i><span>Instax</span></button>
               </div>
             </fieldset>
             <label class="zoom-control">
