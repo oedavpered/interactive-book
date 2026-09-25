@@ -2,6 +2,8 @@ const root = document.documentElement;
 const book = document.querySelector("#book");
 const scene = document.querySelector(".scene");
 const closeFocusButton = document.querySelector(".close-focus");
+const ownerProfile = document.querySelector(".keeper-profile");
+const ownerFields = document.querySelectorAll(".keeper-profile input, .keeper-profile textarea");
 let progress = 0;
 let target = 0;
 let raf = 0;
@@ -23,6 +25,7 @@ function paint() {
   root.style.setProperty("--progress", progress.toFixed(4));
   root.style.setProperty("--cover-turn", coverTurn.toFixed(4));
   root.style.setProperty("--center-shift", (.46 * smoothCentering).toFixed(4));
+  ownerProfile.setAttribute("aria-hidden", String(progress < .16 || progress >= .3));
   document.body.classList.toggle("has-scrolled", progress > 0.025);
   if (progress !== target) raf = requestAnimationFrame(paint);
   else raf = 0;
@@ -45,8 +48,13 @@ function enterFocus() {
   focusProgress = progress;
   isFocused = true;
   root.classList.add("is-focused");
+  book.setAttribute("role", "group");
+  book.tabIndex = -1;
   book.setAttribute("aria-expanded", "true");
   book.setAttribute("aria-label", "Увеличенный разворот книги");
+  if (progress >= .16 && progress < .3) {
+    ownerFields.forEach((field) => { field.disabled = false; });
+  }
   closeFocusButton.focus({ preventScroll: true });
 }
 
@@ -54,6 +62,9 @@ function leaveFocus() {
   if (!isFocused) return;
   isFocused = false;
   root.classList.remove("is-focused");
+  ownerFields.forEach((field) => { field.disabled = true; });
+  book.setAttribute("role", "button");
+  book.tabIndex = 0;
   book.setAttribute("aria-expanded", "false");
   book.setAttribute("aria-label", "Книга; прокручивайте, чтобы листать, или нажмите, чтобы приблизить разворот");
   book.focus({ preventScroll: true });
