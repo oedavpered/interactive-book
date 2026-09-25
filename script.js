@@ -114,7 +114,7 @@ function renderPhotoEditor() {
     option.style.setProperty("--offset", offset);
     option.style.setProperty("--lift", selected ? "-145px" : distance === 1 ? "-120px" : "-105px");
     option.style.setProperty("--scale", selected ? "1" : distance === 1 ? ".72" : ".58");
-    option.style.setProperty("--opacity", selected ? "1" : distance === 1 ? ".78" : ".48");
+    option.style.setProperty("--opacity", "1");
     option.style.setProperty("--layer", selected ? "8" : distance === 1 ? "5" : "3");
     option.style.setProperty("--tilt", tilts[option.dataset.shape] || "0deg");
     const image = frameImages[index];
