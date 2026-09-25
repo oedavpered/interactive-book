@@ -26,8 +26,8 @@
                 <section class="keeper-profile" aria-label="Анкета хранителя дневника">
                   <header class="keeper-header">
                     <button type="button" class="avatar-slot" data-photo-shape="rectangle" aria-label="Добавить фотографию" disabled>
-                      <svg class="avatar-outline" viewBox="0 0 120 90" preserveAspectRatio="none" aria-hidden="true">
-                        <rect x="2" y="2" width="116" height="86" rx="15"></rect>
+                      <svg class="avatar-outline" viewBox="0 0 90 120" preserveAspectRatio="none" aria-hidden="true">
+                        <rect x="2" y="2" width="86" height="116" rx="15"></rect>
                       </svg>
                       <span class="avatar-empty" aria-hidden="true"><b>+</b><small>ФОТО</small></span>
                       <img class="avatar-image" alt="Фотография хранителя дневника" />
@@ -85,8 +85,9 @@
         <span class="scroll-cue" aria-hidden="true">ЛИСТАЙ ВНИЗ<br><b>↓</b></span>
       </section>
     </main>
-    <dialog class="photo-editor" aria-labelledby="photo-editor-title">
+    <dialog class="photo-editor" aria-labelledby="photo-editor-title" aria-describedby="photo-editor-hint">
       <div class="photo-editor-card">
+        <span class="photo-editor-handle" aria-hidden="true"></span>
         <header class="photo-editor-header">
           <div>
             <p>ФОТОГРАФИЯ</p>
@@ -100,7 +101,7 @@
               <img class="crop-image" alt="Предпросмотр фотографии" />
               <div class="crop-empty">Выберите фотографию</div>
             </div>
-            <p class="crop-hint">Перетаскивайте фото, чтобы выбрать кадр</p>
+            <p class="crop-hint" id="photo-editor-hint">Перетаскивайте фото, чтобы выбрать кадр</p>
           </div>
           <div class="photo-settings">
             <label class="photo-upload">
