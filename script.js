@@ -112,7 +112,7 @@ function renderPhotoEditor() {
     const distance = Math.abs(offset);
     option.setAttribute("aria-selected", String(selected));
     option.style.setProperty("--offset", offset);
-    option.style.setProperty("--lift", selected ? "-54px" : distance === 1 ? "-6px" : "4px");
+    option.style.setProperty("--lift", selected ? "-145px" : distance === 1 ? "-120px" : "-105px");
     option.style.setProperty("--scale", selected ? "1" : distance === 1 ? ".72" : ".58");
     option.style.setProperty("--opacity", selected ? "1" : distance === 1 ? ".78" : ".48");
     option.style.setProperty("--layer", selected ? "8" : distance === 1 ? "5" : "3");
