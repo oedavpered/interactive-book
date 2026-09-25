@@ -9,6 +9,7 @@ const backgroundButtons = document.querySelectorAll(".background-choice");
 const backgroundStorageKey = "friendship-diary-background";
 const avatarSlot = document.querySelector(".avatar-slot");
 const avatarImage = document.querySelector(".avatar-image");
+const avatarFrameArt = document.querySelector(".avatar-frame-art");
 const photoEditor = document.querySelector(".photo-editor");
 const photoEditorClose = document.querySelector(".photo-editor-close");
 const photoCancel = document.querySelector(".photo-cancel");
@@ -31,6 +32,12 @@ let dragStart = null;
 let swipeStart = null;
 let suppressFrameClick = false;
 let lastCarouselWheel = 0;
+const assetFrames = {
+  camera: "./assets/frames/camera-frame.png",
+  phone: "./assets/frames/phone-frame.png",
+  lovers: "./assets/frames/lovers-card-frame.png",
+  locket: "./assets/frames/heart-locket-frame.png"
+};
 
 function scrollProgress() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -104,18 +111,18 @@ function setPhotoTransform(element, state) {
 
 function renderPhotoEditor() {
   const selectedIndex = frameOptions.findIndex((option) => option.dataset.shape === draftPhoto.shape);
-  const tilts = { rectangle: "-5deg", circle: "4deg", heart: "-7deg", instax: "5deg" };
+  const tilts = { rectangle: "-5deg", circle: "4deg", instax: "5deg", camera: "-4deg", phone: "3deg", lovers: "-3deg", locket: "5deg" };
   frameOptions.forEach((option, index) => {
     const selected = index === selectedIndex;
     const rawOffset = (index - selectedIndex + frameOptions.length) % frameOptions.length;
-    const offset = rawOffset === 0 ? 0 : rawOffset === 1 ? 1 : rawOffset === 2 ? -2 : -1;
+    const offset = rawOffset <= Math.floor(frameOptions.length / 2) ? rawOffset : rawOffset - frameOptions.length;
     const distance = Math.abs(offset);
     option.setAttribute("aria-selected", String(selected));
     option.style.setProperty("--offset", offset);
-    option.style.setProperty("--lift", selected ? "-145px" : distance === 1 ? "-120px" : "-105px");
-    option.style.setProperty("--scale", selected ? "1" : distance === 1 ? ".72" : ".58");
+    option.style.setProperty("--lift", selected ? "-145px" : distance === 1 ? "-120px" : distance === 2 ? "-108px" : "-102px");
+    option.style.setProperty("--scale", selected ? "1" : distance === 1 ? ".72" : distance === 2 ? ".56" : ".46");
     option.style.setProperty("--opacity", "1");
-    option.style.setProperty("--layer", selected ? "8" : distance === 1 ? "5" : "3");
+    option.style.setProperty("--layer", selected ? "8" : distance === 1 ? "5" : distance === 2 ? "3" : "2");
     option.style.setProperty("--tilt", tilts[option.dataset.shape] || "0deg");
     const image = frameImages[index];
     const empty = frameEmpties[index];
@@ -271,6 +278,7 @@ photoApply.addEventListener("click", () => {
   avatarImage.src = appliedPhoto.src;
   avatarSlot.dataset.hasPhoto = "true";
   avatarSlot.dataset.photoShape = appliedPhoto.shape;
+  avatarFrameArt.src = assetFrames[appliedPhoto.shape] || "";
   avatarSlot.setAttribute("aria-label", "Изменить фотографию");
   setPhotoTransform(avatarImage, appliedPhoto);
   closePhotoEditor();
