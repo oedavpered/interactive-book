@@ -74,12 +74,39 @@ body {
   opacity: calc(.13 + var(--turn) * .2);
   pointer-events: none;
 }
+.page-1 .page-front {
+  --page-background: #db6f96;
+  --page-pattern: radial-gradient(circle,rgba(255,255,255,.76) 0 1.6px,transparent 1.8px);
+  --page-pattern-size: 13px 13px;
+  background-color: var(--page-background);
+  background-image: var(--page-pattern);
+  background-size: var(--page-pattern-size);
+  transition: background-color .3s ease;
+}
+.page-1 .page-front[data-bg-color="rose"] { --page-background: #db6f96; }
+.page-1 .page-front[data-bg-color="sky"] { --page-background: #6caecf; }
+.page-1 .page-front[data-bg-color="leaf"] { --page-background: #76ad82; }
+.page-1 .page-front[data-bg-color="sun"] { --page-background: #d9a64e; }
+.page-1 .page-front[data-bg-pattern="dots"] {
+  --page-pattern: radial-gradient(circle,rgba(255,255,255,.76) 0 1.6px,transparent 1.8px);
+  --page-pattern-size: 13px 13px;
+}
+.page-1 .page-front[data-bg-pattern="grid"] {
+  --page-pattern: linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);
+  --page-pattern-size: 16px 16px;
+}
+.page-1 .page-front[data-bg-pattern="stripes"] {
+  --page-pattern: repeating-linear-gradient(135deg,rgba(255,255,255,.32) 0 5px,transparent 5px 12px);
+  --page-pattern-size: auto;
+}
 .keeper-profile {
-  position: absolute; z-index: 2; inset: 6.5% 7.5% 7%;
-  display: flex; flex-direction: column; gap: 5.2%; color: #667075;
+  position: absolute; z-index: 2; inset: 4.5% 5.5%; padding: 5.5% 6%;
+  display: flex; flex-direction: column; gap: 3.6%; color: #667075;
+  border-radius: 3px; background: rgba(255,255,252,.96);
+  box-shadow: 0 3px 12px rgba(65,52,56,.2), inset 0 0 0 1px rgba(114,123,126,.08);
   pointer-events: none; user-select: none;
 }
-.keeper-header { display: flex; align-items: center; gap: 8%; min-height: 26%; }
+.keeper-header { display: flex; align-items: center; gap: 8%; min-height: 23%; }
 .avatar-slot {
   width: 31%; aspect-ratio: 1; flex: none; border: 1px dashed rgba(112,125,130,.48);
   border-radius: 50%; display: grid; place-content: center; justify-items: center; gap: 2px;
@@ -90,6 +117,27 @@ body {
 .keeper-heading { min-width: 0; }
 .keeper-heading p { margin: 0 0 8px; font-size: 12px; line-height: 1.35; letter-spacing: .1em; color: #8c969a; }
 .keeper-heading h1 { margin: 0; font: 400 30px/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.03em; color: #596469; }
+.background-tools { display: flex; align-items: center; gap: 7px; min-height: 24px; }
+.background-tools > span { margin-right: 1px; font-size: 10px; line-height: 1; letter-spacing: .12em; color: #929b9e; }
+.background-options { display: flex; align-items: center; gap: 5px; }
+.pattern-options { margin-left: auto; }
+.background-choice {
+  width: 19px; height: 19px; flex: none; padding: 0; border: 1px solid rgba(91,103,108,.16);
+  border-radius: 50%; background-color: #fff; cursor: pointer; opacity: 1;
+  box-shadow: 0 1px 3px rgba(57,65,69,.08); transition: transform .18s ease, box-shadow .18s ease;
+}
+.background-choice:hover:not(:disabled) { transform: translateY(-1px); }
+.background-choice[aria-pressed="true"] { box-shadow: 0 0 0 2px #fff,0 0 0 3px rgba(78,91,96,.46); }
+.background-choice:focus-visible { outline: 2px solid #69777c; outline-offset: 2px; }
+.background-choice:disabled { cursor: default; opacity: .55; }
+.color-rose { background: #db6f96; }
+.color-sky { background: #6caecf; }
+.color-leaf { background: #76ad82; }
+.color-sun { background: #d9a64e; }
+.pattern-choice { border-radius: 5px; }
+.pattern-dots { background: radial-gradient(circle,#7c888c 0 1.5px,transparent 1.8px) 0 0/6px 6px,#f8f8f5; }
+.pattern-grid { background: linear-gradient(#a7b0b3 1px,transparent 1px),linear-gradient(90deg,#a7b0b3 1px,transparent 1px),#f8f8f5; background-size: 6px 6px; }
+.pattern-stripes { background: repeating-linear-gradient(135deg,#a7b0b3 0 2px,#f8f8f5 2px 5px); }
 .keeper-field { display: grid; gap: 5px; min-width: 0; }
 .keeper-field > span { font-size: 12px; line-height: 1.2; letter-spacing: .03em; color: #737e82; }
 .keeper-field input, .keeper-field textarea {

@@ -22,7 +22,7 @@
             <div class="page page-3" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
             <div class="page page-2" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
             <div class="page page-1">
-              <div class="page-face page-front">
+              <div class="page-face page-front" data-bg-color="rose" data-bg-pattern="dots">
                 <section class="keeper-profile" aria-label="Анкета хранителя дневника">
                   <header class="keeper-header">
                     <div class="avatar-slot" aria-label="Место для фотографии">
@@ -34,6 +34,20 @@
                       <h1>Это я</h1>
                     </div>
                   </header>
+                  <div class="background-tools" aria-label="Оформление фона">
+                    <span>ФОН</span>
+                    <div class="background-options" role="group" aria-label="Цвет фона">
+                      <button type="button" class="background-choice color-choice color-rose" data-bg-color="rose" aria-label="Розовый фон" aria-pressed="true" disabled></button>
+                      <button type="button" class="background-choice color-choice color-sky" data-bg-color="sky" aria-label="Голубой фон" aria-pressed="false" disabled></button>
+                      <button type="button" class="background-choice color-choice color-leaf" data-bg-color="leaf" aria-label="Зелёный фон" aria-pressed="false" disabled></button>
+                      <button type="button" class="background-choice color-choice color-sun" data-bg-color="sun" aria-label="Жёлтый фон" aria-pressed="false" disabled></button>
+                    </div>
+                    <div class="background-options pattern-options" role="group" aria-label="Узор фона">
+                      <button type="button" class="background-choice pattern-choice pattern-dots" data-bg-pattern="dots" aria-label="Узор в точки" aria-pressed="true" disabled></button>
+                      <button type="button" class="background-choice pattern-choice pattern-grid" data-bg-pattern="grid" aria-label="Узор в клетку" aria-pressed="false" disabled></button>
+                      <button type="button" class="background-choice pattern-choice pattern-stripes" data-bg-pattern="stripes" aria-label="Узор в полоску" aria-pressed="false" disabled></button>
+                    </div>
+                  </div>
                   <label class="keeper-field keeper-name">
                     <span>Меня зовут</span>
                     <input type="text" autocomplete="name" disabled />
