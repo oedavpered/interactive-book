@@ -3,7 +3,10 @@ const book = document.querySelector("#book");
 const scene = document.querySelector(".scene");
 const closeFocusButton = document.querySelector(".close-focus");
 const ownerProfile = document.querySelector(".keeper-profile");
-const ownerFields = document.querySelectorAll(".keeper-profile input, .keeper-profile textarea");
+const ownerPage = document.querySelector(".page-1 .page-front");
+const ownerFields = document.querySelectorAll(".keeper-profile input, .keeper-profile textarea, .keeper-profile button");
+const backgroundButtons = document.querySelectorAll(".background-choice");
+const backgroundStorageKey = "friendship-diary-background";
 let progress = 0;
 let target = 0;
 let raf = 0;
@@ -40,6 +43,39 @@ function update() {
 function openFirstSpread() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   window.scrollTo({ top: .2 * max, behavior: "smooth" });
+}
+
+function applyBackground(color, pattern, remember = true) {
+  const colors = ["rose", "sky", "leaf", "sun"];
+  const patterns = ["dots", "grid", "stripes"];
+  const nextColor = colors.includes(color) ? color : "rose";
+  const nextPattern = patterns.includes(pattern) ? pattern : "dots";
+  ownerPage.dataset.bgColor = nextColor;
+  ownerPage.dataset.bgPattern = nextPattern;
+  backgroundButtons.forEach((button) => {
+    const selected = button.dataset.bgColor === nextColor || button.dataset.bgPattern === nextPattern;
+    button.setAttribute("aria-pressed", String(selected));
+  });
+  if (!remember) return;
+  try {
+    localStorage.setItem(backgroundStorageKey, JSON.stringify({ color: nextColor, pattern: nextPattern }));
+  } catch {}
+}
+
+backgroundButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    applyBackground(
+      button.dataset.bgColor || ownerPage.dataset.bgColor,
+      button.dataset.bgPattern || ownerPage.dataset.bgPattern
+    );
+  });
+});
+
+try {
+  const savedBackground = JSON.parse(localStorage.getItem(backgroundStorageKey));
+  applyBackground(savedBackground?.color, savedBackground?.pattern, false);
+} catch {
+  applyBackground("rose", "dots", false);
 }
 
 function enterFocus() {
