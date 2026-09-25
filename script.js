@@ -114,20 +114,33 @@ function renderPhotoEditor() {
 }
 
 function openPhotoEditor() {
+  if (photoEditor.open) return;
   draftPhoto = { ...appliedPhoto };
   renderPhotoEditor();
+  photoEditor.classList.remove("is-closing");
   photoEditor.showModal();
 }
 
 function closePhotoEditor() {
-  photoEditor.close();
+  if (!photoEditor.open || photoEditor.classList.contains("is-closing")) return;
+  photoEditor.classList.add("is-closing");
 }
+
+photoEditor.addEventListener("animationend", (event) => {
+  if (event.animationName !== "photo-sheet-out" || !photoEditor.classList.contains("is-closing")) return;
+  photoEditor.classList.remove("is-closing");
+  photoEditor.close();
+});
 
 avatarSlot.addEventListener("click", openPhotoEditor);
 photoEditorClose.addEventListener("click", closePhotoEditor);
 photoCancel.addEventListener("click", closePhotoEditor);
 photoEditor.addEventListener("click", (event) => {
   if (event.target === photoEditor) closePhotoEditor();
+});
+photoEditor.addEventListener("cancel", (event) => {
+  event.preventDefault();
+  closePhotoEditor();
 });
 
 photoFile.addEventListener("change", () => {
