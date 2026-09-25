@@ -15,7 +15,7 @@
         <div class="halo" aria-hidden="true"></div>
         <div class="book-wrap">
           <div class="floor-shadow" aria-hidden="true"></div>
-          <div class="book" id="book" aria-label="Книга; прокручивайте, чтобы листать">
+          <div class="book" id="book" role="button" tabindex="0" aria-expanded="false" aria-label="Книга; прокручивайте, чтобы листать, или нажмите, чтобы приблизить разворот">
             <div class="back-cover" aria-hidden="true"></div>
             <div class="page-stack" aria-hidden="true"></div>
             <div class="page page-4" aria-hidden="true"><span class="page-face page-front"></span><span class="page-face page-back"></span></div>
@@ -29,6 +29,7 @@
             <div class="spine" aria-hidden="true"></div>
           </div>
         </div>
+        <button class="close-focus" type="button" aria-label="Вернуться к просмотру книги">×</button>
         <p class="instruction">КЛИК · КОЛЕСО · СВАЙП</p>
         <span class="scroll-cue" aria-hidden="true">ЛИСТАЙ ВНИЗ<br><b>↓</b></span>
       </section>
