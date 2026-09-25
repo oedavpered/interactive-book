@@ -14,20 +14,23 @@ const photoEditorClose = document.querySelector(".photo-editor-close");
 const photoCancel = document.querySelector(".photo-cancel");
 const photoApply = document.querySelector(".photo-apply");
 const photoFile = document.querySelector(".photo-file");
-const cropFrame = document.querySelector(".crop-frame");
-const cropImage = document.querySelector(".crop-image");
-const cropEmpty = document.querySelector(".crop-empty");
+const frameCarousel = document.querySelector(".frame-carousel");
+const frameOptions = [...document.querySelectorAll(".frame-option")];
+const frameImages = [...document.querySelectorAll(".frame-image")];
+const frameEmpties = [...document.querySelectorAll(".frame-empty")];
 const photoZoom = document.querySelector(".photo-zoom");
-const shapeButtons = document.querySelectorAll(".shape-picker button");
 let progress = 0;
 let target = 0;
 let raf = 0;
 let isFocused = false;
 let focusScrollY = 0;
 let focusProgress = 0;
-let appliedPhoto = { src: "", shape: "rectangle", zoom: 1, x: 0, y: 0 };
+let appliedPhoto = { src: "", shape: "instax", zoom: 1, x: 0, y: 0 };
 let draftPhoto = { ...appliedPhoto };
 let dragStart = null;
+let swipeStart = null;
+let suppressFrameClick = false;
+let lastCarouselWheel = 0;
 
 function scrollProgress() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -100,17 +103,39 @@ function setPhotoTransform(element, state) {
 }
 
 function renderPhotoEditor() {
-  cropFrame.dataset.photoShape = draftPhoto.shape;
-  cropImage.src = draftPhoto.src;
-  cropImage.hidden = !draftPhoto.src;
-  cropEmpty.hidden = Boolean(draftPhoto.src);
+  const selectedIndex = frameOptions.findIndex((option) => option.dataset.shape === draftPhoto.shape);
+  const tilts = { rectangle: "-5deg", circle: "4deg", heart: "-7deg", instax: "5deg" };
+  frameOptions.forEach((option, index) => {
+    const selected = index === selectedIndex;
+    const rawOffset = (index - selectedIndex + frameOptions.length) % frameOptions.length;
+    const offset = rawOffset === 0 ? 0 : rawOffset === 1 ? 1 : rawOffset === 2 ? -2 : -1;
+    const distance = Math.abs(offset);
+    option.setAttribute("aria-selected", String(selected));
+    option.style.setProperty("--offset", offset);
+    option.style.setProperty("--lift", selected ? "-54px" : distance === 1 ? "-6px" : "4px");
+    option.style.setProperty("--scale", selected ? "1" : distance === 1 ? ".72" : ".58");
+    option.style.setProperty("--opacity", selected ? "1" : distance === 1 ? ".78" : ".48");
+    option.style.setProperty("--layer", selected ? "8" : distance === 1 ? "5" : "3");
+    option.style.setProperty("--tilt", tilts[option.dataset.shape] || "0deg");
+    const image = frameImages[index];
+    const empty = frameEmpties[index];
+    image.src = draftPhoto.src;
+    image.hidden = !draftPhoto.src;
+    empty.hidden = Boolean(draftPhoto.src) || !selected;
+    empty.innerHTML = "ВЫБРАТЬ<br>ФОТО";
+    setPhotoTransform(image, draftPhoto);
+  });
   photoApply.disabled = !draftPhoto.src;
   photoZoom.value = draftPhoto.zoom;
   photoZoom.disabled = !draftPhoto.src;
-  setPhotoTransform(cropImage, draftPhoto);
-  shapeButtons.forEach((button) => {
-    button.setAttribute("aria-pressed", String(button.dataset.shape === draftPhoto.shape));
-  });
+}
+
+function selectAdjacentFrame(direction) {
+  const current = frameOptions.findIndex((option) => option.dataset.shape === draftPhoto.shape);
+  const next = (current + direction + frameOptions.length) % frameOptions.length;
+  draftPhoto.shape = frameOptions[next].dataset.shape;
+  renderPhotoEditor();
+  frameOptions[next].focus({ preventScroll: true });
 }
 
 function openPhotoEditor() {
@@ -155,47 +180,90 @@ photoFile.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
-shapeButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    draftPhoto.shape = button.dataset.shape;
-    renderPhotoEditor();
+frameOptions.forEach((option) => {
+  option.addEventListener("click", () => {
+    if (suppressFrameClick) return;
+    if (option.dataset.shape !== draftPhoto.shape) {
+      draftPhoto.shape = option.dataset.shape;
+      renderPhotoEditor();
+      option.focus({ preventScroll: true });
+      return;
+    }
+    photoFile.click();
+  });
+  option.addEventListener("keydown", (event) => {
+    if (!['ArrowLeft','ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    selectAdjacentFrame(event.key === 'ArrowRight' ? 1 : -1);
   });
 });
+
+frameCarousel.addEventListener("wheel", (event) => {
+  const amount = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  if (Math.abs(amount) < 8) return;
+  event.preventDefault();
+  const now = performance.now();
+  if (now - lastCarouselWheel < 360) return;
+  lastCarouselWheel = now;
+  selectAdjacentFrame(amount > 0 ? 1 : -1);
+}, { passive: false });
 
 photoZoom.addEventListener("input", () => {
   draftPhoto.zoom = Number(photoZoom.value);
   const limit = (draftPhoto.zoom - 1) * 30;
   draftPhoto.x = Math.max(-limit, Math.min(limit, draftPhoto.x));
   draftPhoto.y = Math.max(-limit, Math.min(limit, draftPhoto.y));
-  setPhotoTransform(cropImage, draftPhoto);
+  frameImages.forEach((image) => setPhotoTransform(image, draftPhoto));
 });
 
-cropFrame.addEventListener("pointerdown", (event) => {
-  if (!draftPhoto.src) return;
-  dragStart = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, photoX: draftPhoto.x, photoY: draftPhoto.y };
-  cropFrame.setPointerCapture(event.pointerId);
-  cropFrame.classList.add("is-dragging");
+frameCarousel.addEventListener("pointerdown", (event) => {
+  const option = event.target.closest(".frame-option");
+  if (!option) return;
+  if (option.dataset.shape === draftPhoto.shape && draftPhoto.src) {
+    dragStart = { pointerId: event.pointerId, option, x: event.clientX, y: event.clientY, photoX: draftPhoto.x, photoY: draftPhoto.y, moved: false };
+    option.setPointerCapture(event.pointerId);
+    option.classList.add("is-dragging");
+    return;
+  }
+  swipeStart = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+  option.setPointerCapture(event.pointerId);
 });
 
-cropFrame.addEventListener("pointermove", (event) => {
-  if (!dragStart || dragStart.pointerId !== event.pointerId) return;
-  const bounds = cropFrame.getBoundingClientRect();
-  const limit = (draftPhoto.zoom - 1) * 30;
-  const nextX = dragStart.photoX + ((event.clientX - dragStart.x) / bounds.width) * 100;
-  const nextY = dragStart.photoY + ((event.clientY - dragStart.y) / bounds.height) * 100;
-  draftPhoto.x = Math.max(-limit, Math.min(limit, nextX));
-  draftPhoto.y = Math.max(-limit, Math.min(limit, nextY));
-  setPhotoTransform(cropImage, draftPhoto);
+frameCarousel.addEventListener("pointermove", (event) => {
+  if (dragStart && dragStart.pointerId === event.pointerId) {
+    const bounds = dragStart.option.getBoundingClientRect();
+    const limit = (draftPhoto.zoom - 1) * 30;
+    const dx = event.clientX - dragStart.x;
+    const dy = event.clientY - dragStart.y;
+    if (Math.hypot(dx,dy) > 4) dragStart.moved = true;
+    draftPhoto.x = Math.max(-limit, Math.min(limit, dragStart.photoX + (dx / bounds.width) * 100));
+    draftPhoto.y = Math.max(-limit, Math.min(limit, dragStart.photoY + (dy / bounds.height) * 100));
+    frameImages.forEach((image) => setPhotoTransform(image, draftPhoto));
+  }
 });
 
-function finishPhotoDrag(event) {
-  if (!dragStart || dragStart.pointerId !== event.pointerId) return;
-  dragStart = null;
-  cropFrame.classList.remove("is-dragging");
+function finishFramePointer(event) {
+  if (dragStart && dragStart.pointerId === event.pointerId) {
+    const moved = dragStart.moved;
+    dragStart.option.classList.remove("is-dragging");
+    dragStart = null;
+    if (moved) {
+      suppressFrameClick = true;
+      setTimeout(() => { suppressFrameClick = false; }, 0);
+    }
+    return;
+  }
+  if (!swipeStart || swipeStart.pointerId !== event.pointerId) return;
+  const dx = event.clientX - swipeStart.x;
+  swipeStart = null;
+  if (Math.abs(dx) < 34) return;
+  suppressFrameClick = true;
+  selectAdjacentFrame(dx < 0 ? 1 : -1);
+  setTimeout(() => { suppressFrameClick = false; }, 0);
 }
 
-cropFrame.addEventListener("pointerup", finishPhotoDrag);
-cropFrame.addEventListener("pointercancel", finishPhotoDrag);
+frameCarousel.addEventListener("pointerup", finishFramePointer);
+frameCarousel.addEventListener("pointercancel", finishFramePointer);
 
 photoApply.addEventListener("click", () => {
   if (!draftPhoto.src) return;
