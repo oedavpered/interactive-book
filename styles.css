@@ -145,21 +145,35 @@ body {
 .avatar-slot[data-photo-shape="circle"] .avatar-photo-frame { transform: rotate(3deg); }
 .avatar-slot[data-photo-shape="instax"] .avatar-photo-frame { inset: -5%; padding: 6px 6px 22%; border-radius: 3px; transform: rotate(-4deg); }
 .avatar-slot[data-photo-shape="instax"] .avatar-photo-window { border-radius: 1px; }
-.avatar-slot:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"]) .avatar-photo-frame {
+.avatar-slot:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-photo-frame {
   --avatar-art-rotate: -3deg; inset: auto; left: 50%; top: 50%; padding: 0; border-radius: 0;
   background: transparent; box-shadow: none; transform: translate(-50%,-50%) rotate(var(--avatar-art-rotate));
   filter: drop-shadow(0 5px 6px rgba(52,59,61,.2));
 }
-.avatar-slot:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"]) .avatar-photo-window {
+.avatar-slot:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-photo-window {
   position: absolute; z-index: 1; left: var(--window-left); top: var(--window-top); width: var(--window-width); height: var(--window-height);
   border-radius: 1px; background: #e5e8e7;
 }
-.avatar-slot:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"]) .avatar-frame-art { display: block; }
+.avatar-slot:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-frame-art { display: block; }
 .avatar-slot[data-photo-shape="camera"] .avatar-photo-frame { width: auto; height: 126%; aspect-ratio: 941/1672; --window-left: 30.7%; --window-top: 45%; --window-width: 53.3%; --window-height: 40.1%; }
 .avatar-slot[data-photo-shape="phone"] .avatar-photo-frame { width: auto; height: 126%; aspect-ratio: 921/1708; --avatar-art-rotate: 3deg; --window-left: 20.7%; --window-top: 12.8%; --window-width: 59.1%; --window-height: 36.4%; }
 .avatar-slot[data-photo-shape="lovers"] .avatar-photo-frame { width: 158%; height: auto; aspect-ratio: 1585/992; --avatar-art-rotate: -4deg; --window-left: 8.9%; --window-top: 15.1%; --window-width: 40%; --window-height: 62.1%; }
 .avatar-slot[data-photo-shape="locket"] .avatar-photo-frame { width: auto; height: 132%; aspect-ratio: 1081/1455; --avatar-art-rotate: 4deg; --window-left: 28.1%; --window-top: 50.1%; --window-width: 44%; --window-height: 26%; }
-.avatar-slot[data-has-photo="true"]:hover:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"]) .avatar-photo-frame {
+.avatar-slot[data-photo-shape="star-polaroid"] .avatar-photo-frame { width: 148%; height: auto; aspect-ratio: 1; --avatar-art-rotate: -4deg; --window-left: 20.7%; --window-top: 12.7%; --window-width: 59%; --window-height: 60.1%; }
+.avatar-slot[data-photo-shape="silver-heart"] .avatar-photo-frame { width: 150%; height: auto; aspect-ratio: 1292/1217; --avatar-art-rotate: 3deg; --window-left: 20.5%; --window-top: 19.5%; --window-width: 58.5%; --window-height: 61.2%; }
+.avatar-slot[data-photo-shape="holographic"] .avatar-photo-frame { width: auto; height: 136%; aspect-ratio: 1160/1355; --avatar-art-rotate: -3deg; --window-left: 12.4%; --window-top: 9.6%; --window-width: 75.2%; --window-height: 67.5%; }
+.avatar-slot[data-photo-shape="cats"] .avatar-photo-frame { width: 148%; height: auto; aspect-ratio: 1; --avatar-art-rotate: 4deg; --window-left: 18.8%; --window-top: 12.9%; --window-width: 62.4%; --window-height: 63.1%; }
+.avatar-slot[data-photo-shape="lace-heart"] .avatar-photo-frame { width: auto; height: 136%; aspect-ratio: 1148/1370; --avatar-art-rotate: -4deg; --window-left: 14.4%; --window-top: 18.3%; --window-width: 72.7%; --window-height: 62.3%; }
+.avatar-slot[data-photo-shape="lace-oval"] .avatar-photo-frame { width: auto; height: 140%; aspect-ratio: 1030/1527; --avatar-art-rotate: 3deg; --window-left: 22%; --window-top: 20.5%; --window-width: 56.6%; --window-height: 56.6%; }
+.avatar-slot:is([data-photo-shape="silver-heart"],[data-photo-shape="lace-heart"]) .avatar-photo-window,
+.frame-option:is([data-shape="silver-heart"],[data-shape="lace-heart"]) .frame-window {
+  border-radius: 0;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath fill='black' d='M50 90 9 51C-13 29 3 0 27 2c11 1 19 7 23 15C54 9 62 3 73 2c24-2 40 27 18 49L50 90Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath fill='black' d='M50 90 9 51C-13 29 3 0 27 2c11 1 19 7 23 15C54 9 62 3 73 2c24-2 40 27 18 49L50 90Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+}
+.avatar-slot[data-photo-shape="lace-oval"] .avatar-photo-window,
+.frame-option[data-shape="lace-oval"] .frame-window { border-radius: 50%; }
+.avatar-slot[data-has-photo="true"]:hover:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-photo-frame {
   box-shadow: none; transform: translate(-50%,-52%) rotate(calc(var(--avatar-art-rotate) + 1deg)); filter: drop-shadow(0 8px 8px rgba(52,59,61,.24));
 }
 .keeper-heading { min-width: 0; }
@@ -259,6 +273,12 @@ body {
 .frame-option[data-shape="phone"] .frame-card { width: 124px; height: 230px; --window-left: 20.7%; --window-top: 12.8%; --window-width: 59.1%; --window-height: 36.4%; }
 .frame-option[data-shape="lovers"] .frame-card { width: 230px; height: 144px; --window-left: 8.9%; --window-top: 15.1%; --window-width: 40%; --window-height: 62.1%; }
 .frame-option[data-shape="locket"] .frame-card { width: 170px; height: 229px; --window-left: 28.1%; --window-top: 50.1%; --window-width: 44%; --window-height: 26%; }
+.frame-option[data-shape="star-polaroid"] .frame-card { width: 198px; height: 198px; --window-left: 20.7%; --window-top: 12.7%; --window-width: 59%; --window-height: 60.1%; }
+.frame-option[data-shape="silver-heart"] .frame-card { width: 202px; height: 190px; --window-left: 20.5%; --window-top: 19.5%; --window-width: 58.5%; --window-height: 61.2%; }
+.frame-option[data-shape="holographic"] .frame-card { width: 166px; height: 194px; --window-left: 12.4%; --window-top: 9.6%; --window-width: 75.2%; --window-height: 67.5%; }
+.frame-option[data-shape="cats"] .frame-card { width: 198px; height: 198px; --window-left: 18.8%; --window-top: 12.9%; --window-width: 62.4%; --window-height: 63.1%; }
+.frame-option[data-shape="lace-heart"] .frame-card { width: 168px; height: 200px; --window-left: 14.4%; --window-top: 18.3%; --window-width: 72.7%; --window-height: 62.3%; }
+.frame-option[data-shape="lace-oval"] .frame-card { width: 145px; height: 215px; --window-left: 22%; --window-top: 20.5%; --window-width: 56.6%; --window-height: 56.6%; }
 .frame-image {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; user-select: none; pointer-events: none;
   transform: translate(var(--photo-x,0%),var(--photo-y,0%)) scale(var(--photo-zoom,1)); transform-origin: center;
@@ -290,6 +310,12 @@ body {
   .frame-option[data-shape="phone"] .frame-card { width: 104px; height: 193px; }
   .frame-option[data-shape="lovers"] .frame-card { width: 194px; height: 121px; }
   .frame-option[data-shape="locket"] .frame-card { width: 143px; height: 193px; }
+  .frame-option[data-shape="star-polaroid"] .frame-card { width: 166px; height: 166px; }
+  .frame-option[data-shape="silver-heart"] .frame-card { width: 170px; height: 160px; }
+  .frame-option[data-shape="holographic"] .frame-card { width: 140px; height: 164px; }
+  .frame-option[data-shape="cats"] .frame-card { width: 166px; height: 166px; }
+  .frame-option[data-shape="lace-heart"] .frame-card { width: 142px; height: 169px; }
+  .frame-option[data-shape="lace-oval"] .frame-card { width: 122px; height: 181px; }
   .photo-editor-bottom { left: 16px; right: 16px; bottom: 12px; gap: 14px; }
   .zoom-control { width: min(150px,42vw); }
   .photo-editor-actions button { min-width: 72px; padding-inline: 12px; }

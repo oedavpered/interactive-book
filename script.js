@@ -36,7 +36,13 @@ const assetFrames = {
   camera: "./assets/frames/camera-frame.png",
   phone: "./assets/frames/phone-frame.png",
   lovers: "./assets/frames/lovers-card-frame.png",
-  locket: "./assets/frames/heart-locket-frame.png"
+  locket: "./assets/frames/heart-locket-frame.png",
+  "star-polaroid": "./assets/frames/star-polaroid-frame.png",
+  "silver-heart": "./assets/frames/silver-heart-frame.png",
+  holographic: "./assets/frames/holographic-frame.png",
+  cats: "./assets/frames/cat-polaroid-frame.png",
+  "lace-heart": "./assets/frames/lace-heart-frame.png",
+  "lace-oval": "./assets/frames/lace-oval-frame.png"
 };
 
 function scrollProgress() {
@@ -111,7 +117,10 @@ function setPhotoTransform(element, state) {
 
 function renderPhotoEditor() {
   const selectedIndex = frameOptions.findIndex((option) => option.dataset.shape === draftPhoto.shape);
-  const tilts = { rectangle: "-5deg", circle: "4deg", instax: "5deg", camera: "-4deg", phone: "3deg", lovers: "-3deg", locket: "5deg" };
+  const tilts = {
+    rectangle: "-5deg", circle: "4deg", instax: "5deg", camera: "-4deg", phone: "3deg", lovers: "-3deg", locket: "5deg",
+    "star-polaroid": "-4deg", "silver-heart": "4deg", holographic: "-3deg", cats: "4deg", "lace-heart": "-5deg", "lace-oval": "3deg"
+  };
   frameOptions.forEach((option, index) => {
     const selected = index === selectedIndex;
     const rawOffset = (index - selectedIndex + frameOptions.length) % frameOptions.length;
