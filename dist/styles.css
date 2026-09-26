@@ -121,7 +121,7 @@ body {
   align-items: center; justify-content: flex-start; gap: 3%;
 }
 .avatar-slot {
-  position: relative; width: 38%; aspect-ratio: 3/4; flex: none; padding: 0; border: 0;
+  position: relative; width: 42%; aspect-ratio: 3/4; flex: none; padding: 0; border: 0;
   border-radius: 16px; display: grid; place-items: center; overflow: visible;
   color: rgba(102,113,118,.58); background: rgba(235,238,237,.28); cursor: pointer;
 }
@@ -185,8 +185,6 @@ body {
 .avatar-slot[data-has-photo="true"]:hover:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-photo-frame {
   box-shadow: none; transform: translate(-50%,-52%) rotate(calc(var(--avatar-art-rotate) + 1deg)); filter: drop-shadow(0 8px 8px rgba(52,59,61,.24));
 }
-.keeper-heading { min-width: 0; text-align: center; }
-.keeper-heading h1 { margin: 0; font: 400 30px/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.03em; color: #596469; }
 .keeper-name { width: 76%; text-align: center; }
 .keeper-name input { text-align: center; }
 .background-tools { display: flex; align-items: center; gap: 7px; min-height: 24px; }
