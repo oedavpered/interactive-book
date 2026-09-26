@@ -53,13 +53,17 @@ function scrollProgress() {
 function paint() {
   progress += (target - progress) * 0.12;
   if (Math.abs(target - progress) < 0.0005) progress = target;
-  const coverTurn = Math.min(1, progress * 5);
+  const coverTurn = Math.min(1, progress * 5.5);
+  const hingeFold = Math.sin(Math.PI * coverTurn);
   const centeringPhase = Math.max(0, Math.min(1, (coverTurn - .5) * 2));
   const smoothCentering = centeringPhase * centeringPhase * (3 - 2 * centeringPhase);
   root.style.setProperty("--progress", progress.toFixed(4));
   root.style.setProperty("--cover-turn", coverTurn.toFixed(4));
+  root.style.setProperty("--hinge-fold", hingeFold.toFixed(4));
+  root.style.setProperty("--spine-width", `${(3 + hingeFold * 2.4).toFixed(3)}%`);
+  root.style.setProperty("--spine-offset", `${(-1.5 - hingeFold * 1.2).toFixed(3)}%`);
   root.style.setProperty("--center-shift", (.46 * smoothCentering).toFixed(4));
-  ownerProfile.setAttribute("aria-hidden", String(progress < .16 || progress >= .3));
+  ownerProfile.setAttribute("aria-hidden", String(progress < .15 || progress >= .46));
   document.body.classList.toggle("has-scrolled", progress > 0.025);
   if (progress !== target) raf = requestAnimationFrame(paint);
   else raf = 0;
@@ -303,7 +307,7 @@ function enterFocus() {
   book.tabIndex = -1;
   book.setAttribute("aria-expanded", "true");
   book.setAttribute("aria-label", "Увеличенный разворот книги");
-  if (progress >= .16 && progress < .3) {
+  if (progress >= .15 && progress < .46) {
     ownerFields.forEach((field) => { field.disabled = false; });
   }
   closeFocusButton.focus({ preventScroll: true });
