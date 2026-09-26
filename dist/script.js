@@ -59,8 +59,10 @@ function paint() {
   const smoothCentering = centeringPhase * centeringPhase * (3 - 2 * centeringPhase);
   root.style.setProperty("--progress", progress.toFixed(4));
   root.style.setProperty("--cover-turn", coverTurn.toFixed(4));
+  root.style.setProperty("--cover-depth", `${(10 - smoothCentering * 30).toFixed(2)}px`);
   root.style.setProperty("--hinge-fold", hingeFold.toFixed(4));
   root.style.setProperty("--center-shift", (.46 * smoothCentering).toFixed(4));
+  book.classList.toggle("is-cover-open", coverTurn > .5);
   ownerProfile.setAttribute("aria-hidden", String(progress < .15 || progress >= .46));
   document.body.classList.toggle("has-scrolled", progress > 0.025);
   if (progress !== target) raf = requestAnimationFrame(paint);
