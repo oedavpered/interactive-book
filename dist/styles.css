@@ -135,8 +135,10 @@ body {
   position: absolute; inset: -3%; padding: 5px; display: none; background: #fff;
   border-radius: 17px; box-shadow: 0 3px 7px rgba(52,59,61,.2),0 8px 17px rgba(52,59,61,.1);
   transform: rotate(-3deg); transform-origin: center;
-  transition: transform .24s ease,box-shadow .24s ease;
+  transition: transform .24s ease,box-shadow .24s ease,opacity .12s ease;
 }
+.avatar-slot.is-awaiting-sticker .avatar-photo-frame { opacity: 0; }
+.avatar-slot.just-stuck { animation: sticker-settle .38s cubic-bezier(.18,.9,.26,1.2); }
 .avatar-photo-window { position: relative; width: 100%; height: 100%; display: block; overflow: hidden; border-radius: 12px; background: #e5e8e7; }
 .avatar-frame-art { display: none; position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
 .avatar-image {
@@ -237,7 +239,9 @@ body {
 .photo-editor::backdrop { background: rgba(77,84,86,.18); backdrop-filter: blur(2px); }
 .photo-editor[open]::backdrop { animation: photo-backdrop-in .35s ease forwards; }
 .photo-editor[open].is-closing::backdrop { animation: photo-backdrop-out .28s ease forwards; }
+.photo-editor.is-sticking::backdrop { background: rgba(77,84,86,.06); backdrop-filter: blur(0); transition: background .38s ease,backdrop-filter .38s ease; }
 .photo-editor-card { position: relative; width: min(980px,100%); height: 100%; margin: 0 auto; padding: 16px 34px 18px; border-radius: inherit; background: transparent; }
+.photo-editor.is-sticking .photo-editor-card { opacity: .28; transform: translateY(28%); transition: opacity .38s ease,transform .55s cubic-bezier(.2,.8,.25,1); }
 .photo-editor-handle {
   position: absolute; top: 9px; left: 50%; width: 44px; height: 4px; border-radius: 99px;
   background: rgba(102,113,118,.2); transform: translateX(-50%);
@@ -306,6 +310,18 @@ body {
 .photo-cancel { border: 1px solid rgba(96,109,114,.2); color: #647075; background: transparent; }
 .photo-apply { border: 0; color: #fff; background: #64767c; }
 .photo-apply:disabled { opacity: .38; cursor: default; }
+.photo-sticker-flight {
+  position: fixed; z-index: 1000; inset: auto; margin: 0; padding: 0; display: block;
+  pointer-events: none; opacity: 1; transform: none; transform-origin: 0 0; transition: none;
+  filter: drop-shadow(0 14px 16px rgba(49,56,59,.24));
+}
+.photo-sticker-flight .frame-card { position: absolute; left: 0; top: 0; margin: 0; transition: none; }
+@keyframes sticker-settle {
+  0% { transform: translateY(-2px) rotate(-3deg) scale(.9); filter: drop-shadow(0 14px 12px rgba(52,59,61,.25)); }
+  45% { transform: translateY(1px) rotate(1deg) scale(1.06); filter: drop-shadow(0 3px 4px rgba(52,59,61,.18)); }
+  72% { transform: rotate(-1deg) scale(.98); }
+  100% { transform: rotate(0) scale(1); }
+}
 @keyframes photo-sheet-in { from { transform: translateY(100%); opacity: .7; } to { transform: translateY(0); opacity: 1; } }
 @keyframes photo-sheet-out { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100%); opacity: .7; } }
 @keyframes photo-backdrop-in { from { background: rgba(77,84,86,0); } to { background: rgba(77,84,86,.18); } }

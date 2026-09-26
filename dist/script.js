@@ -8,6 +8,7 @@ const ownerFields = document.querySelectorAll(".keeper-profile input, .keeper-pr
 const backgroundButtons = document.querySelectorAll(".background-choice");
 const backgroundStorageKey = "friendship-diary-background";
 const avatarSlot = document.querySelector(".avatar-slot");
+const avatarPhotoFrame = document.querySelector(".avatar-photo-frame");
 const avatarImage = document.querySelector(".avatar-image");
 const avatarFrameArt = document.querySelector(".avatar-frame-art");
 const photoEditor = document.querySelector(".photo-editor");
@@ -32,6 +33,8 @@ let dragStart = null;
 let swipeStart = null;
 let suppressFrameClick = false;
 let lastCarouselWheel = 0;
+let isApplyingPhoto = false;
+let stickerAudioContext = null;
 const assetFrames = {
   camera: "./assets/frames/camera-frame.png",
   phone: "./assets/frames/phone-frame.png",
@@ -162,6 +165,7 @@ function openPhotoEditor() {
   if (photoEditor.open) return;
   draftPhoto = { ...appliedPhoto };
   renderPhotoEditor();
+  photoEditor.classList.remove("is-sticking");
   photoEditor.classList.remove("is-closing");
   photoEditor.showModal();
 }
@@ -174,6 +178,7 @@ function closePhotoEditor() {
 photoEditor.addEventListener("animationend", (event) => {
   if (event.animationName !== "photo-sheet-out" || !photoEditor.classList.contains("is-closing")) return;
   photoEditor.classList.remove("is-closing");
+  photoEditor.classList.remove("is-sticking");
   photoEditor.close();
 });
 
@@ -285,16 +290,113 @@ function finishFramePointer(event) {
 frameCarousel.addEventListener("pointerup", finishFramePointer);
 frameCarousel.addEventListener("pointercancel", finishFramePointer);
 
-photoApply.addEventListener("click", () => {
-  if (!draftPhoto.src) return;
-  appliedPhoto = { ...draftPhoto };
-  avatarImage.src = appliedPhoto.src;
+function setAvatarPhoto(state) {
+  appliedPhoto = { ...state };
+  avatarImage.src = state.src;
   avatarSlot.dataset.hasPhoto = "true";
-  avatarSlot.dataset.photoShape = appliedPhoto.shape;
-  avatarFrameArt.src = assetFrames[appliedPhoto.shape] || "";
+  avatarSlot.dataset.photoShape = state.shape;
+  avatarFrameArt.src = assetFrames[state.shape] || "";
   avatarSlot.setAttribute("aria-label", "Изменить фотографию");
-  setPhotoTransform(avatarImage, appliedPhoto);
+  setPhotoTransform(avatarImage, state);
+}
+
+function playStickerSlap() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    stickerAudioContext ||= new AudioContextClass();
+    const context = stickerAudioContext;
+    if (context.state === "suspended") context.resume().catch(() => {});
+    const now = context.currentTime;
+    const noiseLength = Math.floor(context.sampleRate * .11);
+    const buffer = context.createBuffer(1, noiseLength, context.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < noiseLength; i += 1) {
+      const envelope = Math.pow(1 - i / noiseLength, 3.4);
+      data[i] = (Math.random() * 2 - 1) * envelope;
+    }
+    const noise = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const noiseGain = context.createGain();
+    noise.buffer = buffer;
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(1250, now);
+    filter.frequency.exponentialRampToValueAtTime(360, now + .11);
+    noiseGain.gain.setValueAtTime(.18, now);
+    noiseGain.gain.exponentialRampToValueAtTime(.001, now + .11);
+    noise.connect(filter).connect(noiseGain).connect(context.destination);
+
+    const pop = context.createOscillator();
+    const popGain = context.createGain();
+    pop.type = "sine";
+    pop.frequency.setValueAtTime(165, now);
+    pop.frequency.exponentialRampToValueAtTime(76, now + .12);
+    popGain.gain.setValueAtTime(.13, now);
+    popGain.gain.exponentialRampToValueAtTime(.001, now + .13);
+    pop.connect(popGain).connect(context.destination);
+    noise.start(now);
+    pop.start(now);
+    pop.stop(now + .14);
+  } catch {}
+}
+
+function prepareStickerSound() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    stickerAudioContext ||= new AudioContextClass();
+    if (stickerAudioContext.state === "suspended") stickerAudioContext.resume().catch(() => {});
+  } catch {}
+}
+
+async function animateStickerToAvatar() {
+  const selectedOption = frameOptions.find((option) => option.dataset.shape === draftPhoto.shape);
+  const sourceCard = selectedOption?.querySelector(".frame-card");
+  if (!sourceCard) return;
+  const sourceRect = sourceCard.getBoundingClientRect();
+  setAvatarPhoto(draftPhoto);
+  avatarSlot.classList.add("is-awaiting-sticker");
+  const targetRect = avatarPhotoFrame.getBoundingClientRect();
+  const flyer = document.createElement("div");
+  flyer.className = `photo-sticker-flight frame-option${selectedOption.classList.contains("frame-option-asset") ? " frame-option-asset" : ""}`;
+  flyer.dataset.shape = draftPhoto.shape;
+  flyer.append(sourceCard.cloneNode(true));
+  Object.assign(flyer.style, {
+    left: `${sourceRect.left}px`, top: `${sourceRect.top}px`,
+    width: `${sourceRect.width}px`, height: `${sourceRect.height}px`
+  });
+  photoEditor.append(flyer);
+  photoEditor.classList.add("is-sticking");
+
+  const dx = targetRect.left - sourceRect.left;
+  const dy = targetRect.top - sourceRect.top;
+  const targetScale = Math.min(targetRect.width / sourceRect.width, targetRect.height / sourceRect.height);
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const direction = dx >= 0 ? 1 : -1;
+    const flight = flyer.animate([
+      { transform: "translate3d(0,0,0) rotate(0deg) scale(1)", opacity: 1, offset: 0 },
+      { transform: `translate3d(${dx * .34 + 54 * direction}px,${dy * .24 - 76}px,0) rotate(${-8 * direction}deg) scale(1.13)`, opacity: 1, offset: .34 },
+      { transform: `translate3d(${dx * .78 - 18 * direction}px,${dy * .72 - 42}px,0) rotate(${5 * direction}deg) scale(${Math.max(targetScale * 1.12,.34)})`, opacity: 1, offset: .72 },
+      { transform: `translate3d(${dx}px,${dy}px,0) rotate(${-3 * direction}deg) scale(${targetScale * .93})`, opacity: 1, offset: .9 },
+      { transform: `translate3d(${dx}px,${dy}px,0) rotate(0deg) scale(${targetScale})`, opacity: 1, offset: 1 }
+    ], { duration: 920, easing: "cubic-bezier(.18,.76,.24,1)", fill: "forwards" });
+    await flight.finished.catch(() => {});
+  }
+  flyer.remove();
+  avatarSlot.classList.remove("is-awaiting-sticker");
+  avatarSlot.classList.add("just-stuck");
+  playStickerSlap();
+  setTimeout(() => avatarSlot.classList.remove("just-stuck"), 420);
+}
+
+photoApply.addEventListener("click", async () => {
+  if (!draftPhoto.src || isApplyingPhoto) return;
+  prepareStickerSound();
+  isApplyingPhoto = true;
+  photoApply.disabled = true;
+  await animateStickerToAvatar();
   closePhotoEditor();
+  isApplyingPhoto = false;
 });
 
 function enterFocus() {
