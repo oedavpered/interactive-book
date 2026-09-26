@@ -116,9 +116,12 @@ body {
   box-shadow: 0 3px 12px rgba(65,52,56,.2), inset 0 0 0 1px rgba(114,123,126,.08);
   pointer-events: none; user-select: none;
 }
-.keeper-header { display: flex; align-items: center; gap: 8%; min-height: 23%; }
+.keeper-header {
+  width: 100%; height: 55%; flex: none; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start; gap: 3%;
+}
 .avatar-slot {
-  position: relative; width: 27%; aspect-ratio: 3/4; flex: none; padding: 0; border: 0;
+  position: relative; width: 38%; aspect-ratio: 3/4; flex: none; padding: 0; border: 0;
   border-radius: 16px; display: grid; place-items: center; overflow: visible;
   color: rgba(102,113,118,.58); background: rgba(235,238,237,.28); cursor: pointer;
 }
@@ -182,9 +185,10 @@ body {
 .avatar-slot[data-has-photo="true"]:hover:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-photo-frame {
   box-shadow: none; transform: translate(-50%,-52%) rotate(calc(var(--avatar-art-rotate) + 1deg)); filter: drop-shadow(0 8px 8px rgba(52,59,61,.24));
 }
-.keeper-heading { min-width: 0; }
-.keeper-heading p { margin: 0 0 8px; font-size: 12px; line-height: 1.35; letter-spacing: .1em; color: #8c969a; }
+.keeper-heading { min-width: 0; text-align: center; }
 .keeper-heading h1 { margin: 0; font: 400 30px/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.03em; color: #596469; }
+.keeper-name { width: 76%; text-align: center; }
+.keeper-name input { text-align: center; }
 .background-tools { display: flex; align-items: center; gap: 7px; min-height: 24px; }
 .background-tools > span { margin-right: 1px; font-size: 10px; line-height: 1; letter-spacing: .12em; color: #929b9e; }
 .background-options { display: flex; align-items: center; gap: 5px; }
@@ -207,8 +211,8 @@ body {
 .pattern-grid { background: linear-gradient(#a7b0b3 1px,transparent 1px),linear-gradient(90deg,#a7b0b3 1px,transparent 1px),#f8f8f5; background-size: 6px 6px; }
 .pattern-stripes { background: repeating-linear-gradient(135deg,#a7b0b3 0 2px,#f8f8f5 2px 5px); }
 .keeper-fields {
-  height: 44%; margin-top: auto; display: grid;
-  grid-template-rows: auto auto minmax(0,1fr); gap: 7%;
+  height: 27%; margin-top: auto; display: grid;
+  grid-template-rows: auto minmax(0,1fr); gap: 10%;
 }
 .keeper-field { display: grid; gap: 3px; min-width: 0; }
 .keeper-field > span { font-size: 12px; line-height: 1.2; letter-spacing: .03em; color: #737e82; }
