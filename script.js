@@ -60,8 +60,6 @@ function paint() {
   root.style.setProperty("--progress", progress.toFixed(4));
   root.style.setProperty("--cover-turn", coverTurn.toFixed(4));
   root.style.setProperty("--hinge-fold", hingeFold.toFixed(4));
-  root.style.setProperty("--spine-width", `${(3 + hingeFold * 2.4).toFixed(3)}%`);
-  root.style.setProperty("--spine-offset", `${(-1.5 - hingeFold * 1.2).toFixed(3)}%`);
   root.style.setProperty("--center-shift", (.46 * smoothCentering).toFixed(4));
   ownerProfile.setAttribute("aria-hidden", String(progress < .15 || progress >= .46));
   document.body.classList.toggle("has-scrolled", progress > 0.025);
