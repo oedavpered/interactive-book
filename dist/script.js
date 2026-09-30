@@ -165,6 +165,7 @@ function openPhotoEditor() {
   if (photoEditor.open) return;
   draftPhoto = { ...appliedPhoto };
   renderPhotoEditor();
+  frameOptions.forEach((option) => option.classList.remove("is-flight-source"));
   photoEditor.classList.remove("is-sticking");
   photoEditor.classList.remove("is-closing");
   photoEditor.showModal();
@@ -179,6 +180,7 @@ photoEditor.addEventListener("animationend", (event) => {
   if (event.animationName !== "photo-sheet-out" || !photoEditor.classList.contains("is-closing")) return;
   photoEditor.classList.remove("is-closing");
   photoEditor.classList.remove("is-sticking");
+  frameOptions.forEach((option) => option.classList.remove("is-flight-source"));
   photoEditor.close();
 });
 
@@ -354,31 +356,54 @@ async function animateStickerToAvatar() {
   const sourceCard = selectedOption?.querySelector(".frame-card");
   if (!sourceCard) return;
   const sourceRect = sourceCard.getBoundingClientRect();
+  const sourceCenter = {
+    x: sourceRect.left + sourceRect.width / 2,
+    y: sourceRect.top + sourceRect.height / 2
+  };
+  const sourceMatrix = new DOMMatrixReadOnly(getComputedStyle(selectedOption).transform);
+  const sourceScale = Math.hypot(sourceMatrix.a, sourceMatrix.b) || 1;
+  const sourceAngle = Math.atan2(sourceMatrix.b, sourceMatrix.a) * 180 / Math.PI;
   setAvatarPhoto(draftPhoto);
   avatarSlot.classList.add("is-awaiting-sticker");
   const targetRect = avatarPhotoFrame.getBoundingClientRect();
+  const targetCenter = {
+    x: targetRect.left + targetRect.width / 2,
+    y: targetRect.top + targetRect.height / 2
+  };
+  const targetTransform = getComputedStyle(avatarPhotoFrame).transform;
+  const targetMatrix = new DOMMatrixReadOnly(targetTransform === "none" ? undefined : targetTransform);
+  const targetPoseScale = Math.hypot(targetMatrix.a, targetMatrix.b) || 1;
+  const targetAngle = Math.atan2(targetMatrix.b, targetMatrix.a) * 180 / Math.PI;
+  const cardWidth = sourceCard.offsetWidth;
+  const cardHeight = sourceCard.offsetHeight;
+  const editorRect = photoEditor.getBoundingClientRect();
   const flyer = document.createElement("div");
   flyer.className = `photo-sticker-flight frame-option${selectedOption.classList.contains("frame-option-asset") ? " frame-option-asset" : ""}`;
   flyer.dataset.shape = draftPhoto.shape;
   flyer.append(sourceCard.cloneNode(true));
   Object.assign(flyer.style, {
-    left: `${sourceRect.left}px`, top: `${sourceRect.top}px`,
-    width: `${sourceRect.width}px`, height: `${sourceRect.height}px`
+    left: `${sourceCenter.x - editorRect.left}px`, top: `${sourceCenter.y - editorRect.top}px`,
+    width: `${cardWidth}px`, height: `${cardHeight}px`,
+    marginLeft: `${-cardWidth / 2}px`, marginTop: `${-cardHeight / 2}px`
   });
   photoEditor.append(flyer);
+  selectedOption.classList.add("is-flight-source");
   photoEditor.classList.add("is-sticking");
 
-  const dx = targetRect.left - sourceRect.left;
-  const dy = targetRect.top - sourceRect.top;
-  const targetScale = Math.min(targetRect.width / sourceRect.width, targetRect.height / sourceRect.height);
+  const dx = targetCenter.x - sourceCenter.x;
+  const dy = targetCenter.y - sourceCenter.y;
+  const targetScale = Math.min(
+    avatarPhotoFrame.offsetWidth / cardWidth,
+    avatarPhotoFrame.offsetHeight / cardHeight
+  ) * targetPoseScale;
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const direction = dx >= 0 ? 1 : -1;
     const flight = flyer.animate([
-      { transform: "translate3d(0,0,0) rotate(0deg) scale(1)", opacity: 1, offset: 0 },
-      { transform: `translate3d(${dx * .34 + 54 * direction}px,${dy * .24 - 76}px,0) rotate(${-8 * direction}deg) scale(1.13)`, opacity: 1, offset: .34 },
-      { transform: `translate3d(${dx * .78 - 18 * direction}px,${dy * .72 - 42}px,0) rotate(${5 * direction}deg) scale(${Math.max(targetScale * 1.12,.34)})`, opacity: 1, offset: .72 },
-      { transform: `translate3d(${dx}px,${dy}px,0) rotate(${-3 * direction}deg) scale(${targetScale * .93})`, opacity: 1, offset: .9 },
-      { transform: `translate3d(${dx}px,${dy}px,0) rotate(0deg) scale(${targetScale})`, opacity: 1, offset: 1 }
+      { transform: `translate3d(0,0,0) rotate(${sourceAngle}deg) scale(${sourceScale})`, opacity: 1, offset: 0 },
+      { transform: `translate3d(${dx * .34 + 54 * direction}px,${dy * .24 - 76}px,0) rotate(${sourceAngle - 8 * direction}deg) scale(${sourceScale * 1.13})`, opacity: 1, offset: .34 },
+      { transform: `translate3d(${dx * .78 - 18 * direction}px,${dy * .72 - 42}px,0) rotate(${targetAngle + 5 * direction}deg) scale(${Math.max(targetScale * 1.12,.34)})`, opacity: 1, offset: .72 },
+      { transform: `translate3d(${dx}px,${dy}px,0) rotate(${targetAngle - 3 * direction}deg) scale(${targetScale * .93})`, opacity: 1, offset: .9 },
+      { transform: `translate3d(${dx}px,${dy}px,0) rotate(${targetAngle}deg) scale(${targetScale})`, opacity: 1, offset: 1 }
     ], { duration: 920, easing: "cubic-bezier(.18,.76,.24,1)", fill: "forwards" });
     await flight.finished.catch(() => {});
   }
