@@ -103,8 +103,8 @@ body {
   pointer-events: none; user-select: none;
 }
 .keeper-header {
-  width: 100%; height: 55%; flex: none; display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start; gap: 3%;
+  width: 100%; height: 62%; flex: none; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start; gap: 0;
 }
 .avatar-slot {
   position: relative; width: 42%; aspect-ratio: 3/4; flex: none; padding: 0; border: 0;
@@ -178,10 +178,21 @@ body {
 .avatar-slot[data-has-photo="true"]:hover:is([data-photo-shape="camera"],[data-photo-shape="phone"],[data-photo-shape="lovers"],[data-photo-shape="locket"],[data-photo-shape="star-polaroid"],[data-photo-shape="silver-heart"],[data-photo-shape="holographic"],[data-photo-shape="cats"],[data-photo-shape="lace-heart"],[data-photo-shape="lace-oval"]) .avatar-photo-frame {
   box-shadow: none; transform: translate(-50%,-52%) rotate(calc(var(--avatar-art-rotate) + 1deg)); filter: drop-shadow(0 8px 8px rgba(52,59,61,.24));
 }
-.keeper-name { width: 76%; text-align: center; }
-.keeper-name input { text-align: center; }
+.keeper-name { width: 86%; margin-top: 10%; text-align: center; }
+.keeper-field.keeper-name > span {
+  color: #4C4A4A; -webkit-text-stroke: 0; text-shadow: none;
+  font-size: 21px; line-height: 1.1;
+}
+.keeper-field.keeper-name input {
+  min-height: 62px; text-align: center; color: #fff; -webkit-text-fill-color: #fff;
+  font-size: 52px; line-height: 1.08; -webkit-text-stroke: 4px #E32BA9;
+  paint-order: stroke fill;
+  text-shadow:
+    4px 0 #E32BA9,-4px 0 #E32BA9,0 4px #E32BA9,0 -4px #E32BA9,
+    2.8px 2.8px #E32BA9,-2.8px 2.8px #E32BA9,2.8px -2.8px #E32BA9,-2.8px -2.8px #E32BA9;
+}
 .keeper-fields {
-  height: 27%; margin-top: auto; display: grid;
+  height: 24%; margin-top: auto; display: grid;
   grid-template-rows: auto minmax(0,1fr); gap: 10%;
 }
 .keeper-field {
@@ -196,11 +207,11 @@ body {
 }
 .keeper-field > span {
   font-size: 21px; line-height: 1.08; letter-spacing: .01em; color: #fff;
-  -webkit-text-stroke: 2px #E32BA9;
+  -webkit-text-stroke: 4px #E32BA9;
   paint-order: stroke fill;
   text-shadow:
-    2px 0 #E32BA9,-2px 0 #E32BA9,0 2px #E32BA9,0 -2px #E32BA9,
-    1.4px 1.4px #E32BA9,-1.4px 1.4px #E32BA9,1.4px -1.4px #E32BA9,-1.4px -1.4px #E32BA9;
+    4px 0 #E32BA9,-4px 0 #E32BA9,0 4px #E32BA9,0 -4px #E32BA9,
+    2.8px 2.8px #E32BA9,-2.8px 2.8px #E32BA9,2.8px -2.8px #E32BA9,-2.8px -2.8px #E32BA9;
 }
 .keeper-field input, .keeper-field textarea {
   width: 100%; min-width: 0; border: 0; border-radius: 8px; padding: 1px 3px 2px;
