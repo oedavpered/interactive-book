@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "Great Vibes";
+  src: url("./assets/fonts/GreatVibes-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 :root {
   color-scheme: light;
   --book-w: min(43vw, 390px);
@@ -90,6 +97,7 @@ body {
 .keeper-profile {
   position: absolute; z-index: 2; inset: 0; padding: 6% 7%;
   display: flex; flex-direction: column; gap: 3.6%; color: #667075;
+  font-family: "Great Vibes", cursive;
   border-radius: inherit; background: #fffefa;
   box-shadow: none;
   pointer-events: none; user-select: none;
@@ -176,18 +184,31 @@ body {
   height: 27%; margin-top: auto; display: grid;
   grid-template-rows: auto minmax(0,1fr); gap: 10%;
 }
-.keeper-field { display: grid; gap: 3px; min-width: 0; }
-.keeper-field > span { font-size: 12px; line-height: 1.2; letter-spacing: .03em; color: #737e82; }
-.keeper-field input, .keeper-field textarea {
-  width: 100%; min-width: 0; border: 0; border-bottom: 1px solid rgba(111,123,128,.32);
-  border-radius: 0; padding: 1px 1px 3px; color: #4f5a5f; background: transparent;
-  font: 400 14px/1.35 "Helvetica Neue", Arial, sans-serif; caret-color: #6a767b;
-  resize: none; outline: none; opacity: 1; -webkit-text-fill-color: #4f5a5f;
+.keeper-field {
+  display: grid; gap: 1px; min-width: 0; padding: 4px 8px 5px; border-radius: 12px;
+  background: rgba(227,43,169,0); box-shadow: 0 0 0 0 rgba(227,43,169,0);
+  transition: background-color .22s ease,box-shadow .22s ease,transform .22s ease;
 }
-.keeper-field input:focus, .keeper-field textarea:focus { border-bottom-color: #6f7d82; }
+.keeper-field:hover, .keeper-field:focus-within {
+  background: rgba(227,43,169,.10);
+  box-shadow: 0 0 0 2px rgba(227,43,169,.16),0 5px 14px rgba(227,43,169,.08);
+  transform: translateY(-1px);
+}
+.keeper-field > span {
+  font-size: 21px; line-height: 1.08; letter-spacing: .01em; color: #fff;
+  -webkit-text-stroke: 1.25px #E32BA9;
+  paint-order: stroke fill;
+  text-shadow: 1px 0 #E32BA9,-1px 0 #E32BA9,0 1px #E32BA9,0 -1px #E32BA9;
+}
+.keeper-field input, .keeper-field textarea {
+  width: 100%; min-width: 0; border: 0; border-radius: 8px; padding: 1px 3px 2px;
+  color: #4C4A4A; background: transparent;
+  font: 400 21px/1.25 "Great Vibes", cursive; caret-color: #E32BA9;
+  resize: none; outline: none; opacity: 1; -webkit-text-fill-color: #4C4A4A;
+}
 .keeper-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9%; }
 .keeper-about { min-height: 0; }
-.keeper-about textarea { height: 100%; min-height: 36px; line-height: 1.65; background-image: repeating-linear-gradient(to bottom, transparent 0 21px, rgba(111,123,128,.2) 21px 22px); border-bottom: 0; }
+.keeper-about textarea { height: 100%; min-height: 36px; line-height: 1.35; background-image: none; }
 .is-focused .keeper-profile { pointer-events: auto; user-select: auto; }
 .photo-editor {
   position: fixed; inset: auto 0 0; width: 100%; max-width: none; height: min(22vh,165px); min-height: 150px;
