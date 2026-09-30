@@ -496,7 +496,7 @@ async function animateStickerToAvatar() {
   const cardHeight = sourceCard.offsetHeight;
   const editorRect = photoEditor.getBoundingClientRect();
   const flyer = document.createElement("div");
-  flyer.className = `photo-sticker-flight frame-option${selectedOption.classList.contains("frame-option-asset") ? " frame-option-asset" : ""}`;
+  flyer.className = `photo-sticker-flight frame-option${selectedOption.classList.contains("frame-option-asset") ? " frame-option-asset" : ""}${selectedOption.classList.contains("has-photo") ? " has-photo" : ""}`;
   flyer.dataset.shape = draftPhoto.shape;
   flyer.append(sourceCard.cloneNode(true));
   Object.assign(flyer.style, {
