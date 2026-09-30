@@ -196,9 +196,11 @@ body {
 }
 .keeper-field > span {
   font-size: 21px; line-height: 1.08; letter-spacing: .01em; color: #fff;
-  -webkit-text-stroke: 1.25px #E32BA9;
+  -webkit-text-stroke: 2px #E32BA9;
   paint-order: stroke fill;
-  text-shadow: 1px 0 #E32BA9,-1px 0 #E32BA9,0 1px #E32BA9,0 -1px #E32BA9;
+  text-shadow:
+    2px 0 #E32BA9,-2px 0 #E32BA9,0 2px #E32BA9,0 -2px #E32BA9,
+    1.4px 1.4px #E32BA9,-1.4px 1.4px #E32BA9,1.4px -1.4px #E32BA9,-1.4px -1.4px #E32BA9;
 }
 .keeper-field input, .keeper-field textarea {
   width: 100%; min-width: 0; border: 0; border-radius: 8px; padding: 1px 3px 2px;
