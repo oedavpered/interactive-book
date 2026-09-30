@@ -32,14 +32,13 @@ let suppressFrameClick = false;
 let lastCarouselWheel = 0;
 let isApplyingPhoto = false;
 let stickerAudioContext = null;
-let personSegmenterPromise = null;
+let subjectRemoverPromise = null;
 let cutoutJob = 0;
 let isCutoutProcessing = false;
 let cutoutError = false;
 let cutoutErrorMessage = "";
-const visionModuleUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
-const visionWasmUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
-const personModelUrl = "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite";
+const transformersModuleUrl = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+const subjectModel = "onnx-community/ormbg-ONNX";
 const assetFrames = {
   camera: "./assets/frames/camera-frame.png",
   phone: "./assets/frames/phone-frame.png",
@@ -94,53 +93,34 @@ function setPhotoTransform(element, state) {
   element.style.setProperty("--photo-zoom", state.zoom);
 }
 
-function loadPhotoImage(src) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.addEventListener("load", () => resolve(image), { once: true });
-    image.addEventListener("error", () => reject(new Error("photo-load-failed")), { once: true });
-    image.src = src;
-  });
-}
-
-async function getPersonSegmenter() {
-  if (!personSegmenterPromise) {
-    personSegmenterPromise = (async () => {
-      const { FilesetResolver, ImageSegmenter } = await import(visionModuleUrl);
-      const vision = await FilesetResolver.forVisionTasks(visionWasmUrl);
-      return ImageSegmenter.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: personModelUrl },
-        runningMode: "IMAGE",
-        outputCategoryMask: false,
-        outputConfidenceMasks: true
-      });
+async function getSubjectRemover() {
+  if (!subjectRemoverPromise) {
+    subjectRemoverPromise = (async () => {
+      const { pipeline } = await import(transformersModuleUrl);
+      return pipeline("background-removal", subjectModel, { dtype: "q8" });
     })().catch((error) => {
-      personSegmenterPromise = null;
+      subjectRemoverPromise = null;
       throw error;
     });
   }
-  return personSegmenterPromise;
+  return subjectRemoverPromise;
 }
 
-async function createPersonCutout(src) {
-  const [image, segmenter] = await Promise.all([loadPhotoImage(src), getPersonSegmenter()]);
-  const result = segmenter.segment(image);
-  const personMask = result.confidenceMasks?.[1];
-  if (!personMask) {
-    result.close();
-    throw new Error("person-mask-missing");
-  }
-
-  const values = personMask.getAsFloat32Array();
-  const maskWidth = personMask.width;
-  const maskHeight = personMask.height;
-  let minX = maskWidth;
-  let minY = maskHeight;
+async function createSubjectCutout(src) {
+  const remover = await getSubjectRemover();
+  const output = await remover(src);
+  const rawImage = Array.isArray(output) ? output[0] : output;
+  if (!rawImage) throw new Error("subject-mask-missing");
+  const sourceCanvas = rawImage.toCanvas();
+  const sourceContext = sourceCanvas.getContext("2d", { willReadFrequently: true });
+  const pixels = sourceContext.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+  let minX = sourceCanvas.width;
+  let minY = sourceCanvas.height;
   let maxX = -1;
   let maxY = -1;
-  for (let y = 0; y < maskHeight; y += 1) {
-    for (let x = 0; x < maskWidth; x += 1) {
-      if (values[y * maskWidth + x] < .22) continue;
+  for (let y = 0; y < sourceCanvas.height; y += 1) {
+    for (let x = 0; x < sourceCanvas.width; x += 1) {
+      if (pixels.data[(y * sourceCanvas.width + x) * 4 + 3] < 28) continue;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
       maxX = Math.max(maxX, x);
@@ -148,56 +128,29 @@ async function createPersonCutout(src) {
     }
   }
   if (maxX < minX || maxY < minY) {
-    result.close();
-    throw new Error("person-not-found");
+    throw new Error("subject-not-found");
   }
 
   const marginX = Math.round((maxX - minX + 1) * .06);
   const marginY = Math.round((maxY - minY + 1) * .04);
   minX = Math.max(0, minX - marginX);
   minY = Math.max(0, minY - marginY);
-  maxX = Math.min(maskWidth - 1, maxX + marginX);
-  maxY = Math.min(maskHeight - 1, maxY + marginY);
+  maxX = Math.min(sourceCanvas.width - 1, maxX + marginX);
+  maxY = Math.min(sourceCanvas.height - 1, maxY + marginY);
 
-  const maskCanvas = document.createElement("canvas");
-  maskCanvas.width = maskWidth;
-  maskCanvas.height = maskHeight;
-  const maskContext = maskCanvas.getContext("2d");
-  const maskImage = maskContext.createImageData(maskWidth, maskHeight);
-  for (let i = 0; i < values.length; i += 1) {
-    const alpha = Math.max(0, Math.min(255, Math.round((values[i] - .08) * 300)));
-    const offset = i * 4;
-    maskImage.data[offset] = 255;
-    maskImage.data[offset + 1] = 255;
-    maskImage.data[offset + 2] = 255;
-    maskImage.data[offset + 3] = alpha;
-  }
-  maskContext.putImageData(maskImage, 0, 0);
-  result.close();
-
-  const sourceX = minX / maskWidth * image.naturalWidth;
-  const sourceY = minY / maskHeight * image.naturalHeight;
-  const sourceWidth = (maxX - minX + 1) / maskWidth * image.naturalWidth;
-  const sourceHeight = (maxY - minY + 1) / maskHeight * image.naturalHeight;
+  const sourceWidth = maxX - minX + 1;
+  const sourceHeight = maxY - minY + 1;
   const maxSide = 820;
   const scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
   const width = Math.max(1, Math.round(sourceWidth * scale));
   const height = Math.max(1, Math.round(sourceHeight * scale));
 
-  const alphaCanvas = document.createElement("canvas");
-  alphaCanvas.width = width;
-  alphaCanvas.height = height;
-  const alphaContext = alphaCanvas.getContext("2d");
-  alphaContext.imageSmoothingEnabled = true;
-  alphaContext.drawImage(maskCanvas, minX, minY, maxX - minX + 1, maxY - minY + 1, 0, 0, width, height);
-
   const cutoutCanvas = document.createElement("canvas");
   cutoutCanvas.width = width;
   cutoutCanvas.height = height;
   const cutoutContext = cutoutCanvas.getContext("2d");
-  cutoutContext.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height);
-  cutoutContext.globalCompositeOperation = "destination-in";
-  cutoutContext.drawImage(alphaCanvas, 0, 0);
+  cutoutContext.imageSmoothingEnabled = true;
+  cutoutContext.drawImage(sourceCanvas, minX, minY, sourceWidth, sourceHeight, 0, 0, width, height);
 
   const outline = Math.max(8, Math.round(Math.max(width, height) * .022));
   const padding = outline + Math.max(8, Math.round(outline * .7));
@@ -212,7 +165,7 @@ async function createPersonCutout(src) {
   silhouetteContext.fillStyle = "#fff";
   silhouetteContext.fillRect(0, 0, width, height);
   silhouetteContext.globalCompositeOperation = "destination-in";
-  silhouetteContext.drawImage(alphaCanvas, 0, 0);
+  silhouetteContext.drawImage(cutoutCanvas, 0, 0);
 
   stickerContext.save();
   stickerContext.shadowColor = "rgba(48,54,57,.28)";
@@ -241,7 +194,7 @@ async function prepareCutout(source) {
   draftPhoto = { ...draftPhoto, originalSrc: source, cutoutSrc: "", src: "" };
   renderPhotoEditor();
   try {
-    const cutoutSrc = await createPersonCutout(source);
+    const cutoutSrc = await createSubjectCutout(source);
     if (job !== cutoutJob) return;
     draftPhoto = {
       ...draftPhoto,
@@ -251,8 +204,8 @@ async function prepareCutout(source) {
   } catch (error) {
     if (job === cutoutJob) {
       cutoutError = true;
-      cutoutErrorMessage = ["person-not-found", "person-mask-missing"].includes(error?.message)
-        ? "НЕ НАШЛА<br>ЧЕЛОВЕКА"
+      cutoutErrorMessage = ["subject-not-found", "subject-mask-missing"].includes(error?.message)
+        ? "НЕ НАШЛА<br>ОБЪЕКТ"
         : "НЕ УДАЛОСЬ<br>ОБРАБОТАТЬ";
       draftPhoto = { ...draftPhoto, src: "", cutoutSrc: "" };
     }
