@@ -24,7 +24,7 @@ let raf = 0;
 let isFocused = false;
 let focusScrollY = 0;
 let focusProgress = 0;
-let appliedPhoto = { src: "", shape: "instax", zoom: 1, x: 0, y: 0 };
+let appliedPhoto = { src: "", originalSrc: "", cutoutSrc: "", shape: "instax", zoom: 1, x: 0, y: 0 };
 let draftPhoto = { ...appliedPhoto };
 let dragStart = null;
 let swipeStart = null;
@@ -32,6 +32,14 @@ let suppressFrameClick = false;
 let lastCarouselWheel = 0;
 let isApplyingPhoto = false;
 let stickerAudioContext = null;
+let personSegmenterPromise = null;
+let cutoutJob = 0;
+let isCutoutProcessing = false;
+let cutoutError = false;
+let cutoutErrorMessage = "";
+const visionModuleUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
+const visionWasmUrl = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
+const personModelUrl = "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite";
 const assetFrames = {
   camera: "./assets/frames/camera-frame.png",
   phone: "./assets/frames/phone-frame.png",
@@ -86,10 +94,194 @@ function setPhotoTransform(element, state) {
   element.style.setProperty("--photo-zoom", state.zoom);
 }
 
+function loadPhotoImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image), { once: true });
+    image.addEventListener("error", () => reject(new Error("photo-load-failed")), { once: true });
+    image.src = src;
+  });
+}
+
+async function getPersonSegmenter() {
+  if (!personSegmenterPromise) {
+    personSegmenterPromise = (async () => {
+      const { FilesetResolver, ImageSegmenter } = await import(visionModuleUrl);
+      const vision = await FilesetResolver.forVisionTasks(visionWasmUrl);
+      return ImageSegmenter.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: personModelUrl },
+        runningMode: "IMAGE",
+        outputCategoryMask: false,
+        outputConfidenceMasks: true
+      });
+    })().catch((error) => {
+      personSegmenterPromise = null;
+      throw error;
+    });
+  }
+  return personSegmenterPromise;
+}
+
+async function createPersonCutout(src) {
+  const [image, segmenter] = await Promise.all([loadPhotoImage(src), getPersonSegmenter()]);
+  const result = segmenter.segment(image);
+  const personMask = result.confidenceMasks?.[1];
+  if (!personMask) {
+    result.close();
+    throw new Error("person-mask-missing");
+  }
+
+  const values = personMask.getAsFloat32Array();
+  const maskWidth = personMask.width;
+  const maskHeight = personMask.height;
+  let minX = maskWidth;
+  let minY = maskHeight;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < maskHeight; y += 1) {
+    for (let x = 0; x < maskWidth; x += 1) {
+      if (values[y * maskWidth + x] < .22) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  if (maxX < minX || maxY < minY) {
+    result.close();
+    throw new Error("person-not-found");
+  }
+
+  const marginX = Math.round((maxX - minX + 1) * .06);
+  const marginY = Math.round((maxY - minY + 1) * .04);
+  minX = Math.max(0, minX - marginX);
+  minY = Math.max(0, minY - marginY);
+  maxX = Math.min(maskWidth - 1, maxX + marginX);
+  maxY = Math.min(maskHeight - 1, maxY + marginY);
+
+  const maskCanvas = document.createElement("canvas");
+  maskCanvas.width = maskWidth;
+  maskCanvas.height = maskHeight;
+  const maskContext = maskCanvas.getContext("2d");
+  const maskImage = maskContext.createImageData(maskWidth, maskHeight);
+  for (let i = 0; i < values.length; i += 1) {
+    const alpha = Math.max(0, Math.min(255, Math.round((values[i] - .08) * 300)));
+    const offset = i * 4;
+    maskImage.data[offset] = 255;
+    maskImage.data[offset + 1] = 255;
+    maskImage.data[offset + 2] = 255;
+    maskImage.data[offset + 3] = alpha;
+  }
+  maskContext.putImageData(maskImage, 0, 0);
+  result.close();
+
+  const sourceX = minX / maskWidth * image.naturalWidth;
+  const sourceY = minY / maskHeight * image.naturalHeight;
+  const sourceWidth = (maxX - minX + 1) / maskWidth * image.naturalWidth;
+  const sourceHeight = (maxY - minY + 1) / maskHeight * image.naturalHeight;
+  const maxSide = 820;
+  const scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+  const width = Math.max(1, Math.round(sourceWidth * scale));
+  const height = Math.max(1, Math.round(sourceHeight * scale));
+
+  const alphaCanvas = document.createElement("canvas");
+  alphaCanvas.width = width;
+  alphaCanvas.height = height;
+  const alphaContext = alphaCanvas.getContext("2d");
+  alphaContext.imageSmoothingEnabled = true;
+  alphaContext.drawImage(maskCanvas, minX, minY, maxX - minX + 1, maxY - minY + 1, 0, 0, width, height);
+
+  const cutoutCanvas = document.createElement("canvas");
+  cutoutCanvas.width = width;
+  cutoutCanvas.height = height;
+  const cutoutContext = cutoutCanvas.getContext("2d");
+  cutoutContext.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height);
+  cutoutContext.globalCompositeOperation = "destination-in";
+  cutoutContext.drawImage(alphaCanvas, 0, 0);
+
+  const outline = Math.max(8, Math.round(Math.max(width, height) * .022));
+  const padding = outline + Math.max(8, Math.round(outline * .7));
+  const stickerCanvas = document.createElement("canvas");
+  stickerCanvas.width = width + padding * 2;
+  stickerCanvas.height = height + padding * 2;
+  const stickerContext = stickerCanvas.getContext("2d");
+  const silhouetteCanvas = document.createElement("canvas");
+  silhouetteCanvas.width = width;
+  silhouetteCanvas.height = height;
+  const silhouetteContext = silhouetteCanvas.getContext("2d");
+  silhouetteContext.fillStyle = "#fff";
+  silhouetteContext.fillRect(0, 0, width, height);
+  silhouetteContext.globalCompositeOperation = "destination-in";
+  silhouetteContext.drawImage(alphaCanvas, 0, 0);
+
+  stickerContext.save();
+  stickerContext.shadowColor = "rgba(48,54,57,.28)";
+  stickerContext.shadowBlur = outline * 1.25;
+  stickerContext.shadowOffsetY = Math.max(3, outline * .35);
+  stickerContext.drawImage(silhouetteCanvas, padding, padding);
+  stickerContext.restore();
+  for (let step = 0; step < 32; step += 1) {
+    const angle = step / 32 * Math.PI * 2;
+    stickerContext.drawImage(
+      silhouetteCanvas,
+      padding + Math.cos(angle) * outline,
+      padding + Math.sin(angle) * outline
+    );
+  }
+  stickerContext.drawImage(silhouetteCanvas, padding, padding);
+  stickerContext.drawImage(cutoutCanvas, padding, padding);
+  return stickerCanvas.toDataURL("image/png");
+}
+
+async function prepareCutout(source) {
+  const job = ++cutoutJob;
+  isCutoutProcessing = true;
+  cutoutError = false;
+  cutoutErrorMessage = "";
+  draftPhoto = { ...draftPhoto, originalSrc: source, cutoutSrc: "", src: "" };
+  renderPhotoEditor();
+  try {
+    const cutoutSrc = await createPersonCutout(source);
+    if (job !== cutoutJob) return;
+    draftPhoto = {
+      ...draftPhoto,
+      cutoutSrc,
+      src: draftPhoto.shape === "cutout" ? cutoutSrc : draftPhoto.originalSrc
+    };
+  } catch (error) {
+    if (job === cutoutJob) {
+      cutoutError = true;
+      cutoutErrorMessage = ["person-not-found", "person-mask-missing"].includes(error?.message)
+        ? "НЕ НАШЛА<br>ЧЕЛОВЕКА"
+        : "НЕ УДАЛОСЬ<br>ОБРАБОТАТЬ";
+      draftPhoto = { ...draftPhoto, src: "", cutoutSrc: "" };
+    }
+  } finally {
+    if (job === cutoutJob) {
+      isCutoutProcessing = false;
+      renderPhotoEditor();
+    }
+  }
+}
+
+function selectFrameShape(shape) {
+  draftPhoto.shape = shape;
+  if (shape === "cutout") {
+    if (draftPhoto.cutoutSrc) draftPhoto.src = draftPhoto.cutoutSrc;
+    else if (draftPhoto.originalSrc && !isCutoutProcessing) {
+      prepareCutout(draftPhoto.originalSrc);
+      return;
+    } else draftPhoto.src = "";
+  } else if (draftPhoto.originalSrc) {
+    draftPhoto.src = draftPhoto.originalSrc;
+  }
+  renderPhotoEditor();
+}
+
 function renderPhotoEditor() {
   const selectedIndex = frameOptions.findIndex((option) => option.dataset.shape === draftPhoto.shape);
   const tilts = {
-    rectangle: "-5deg", circle: "4deg", instax: "5deg", camera: "-4deg", phone: "3deg", lovers: "-3deg", locket: "5deg",
+    rectangle: "-5deg", circle: "4deg", cutout: "-4deg", instax: "5deg", camera: "-4deg", phone: "3deg", lovers: "-3deg", locket: "5deg",
     "star-polaroid": "-4deg", "silver-heart": "4deg", holographic: "-3deg", cats: "4deg", "lace-heart": "-5deg", "lace-oval": "3deg"
   };
   frameOptions.forEach((option, index) => {
@@ -106,13 +298,20 @@ function renderPhotoEditor() {
     option.style.setProperty("--tilt", tilts[option.dataset.shape] || "0deg");
     const image = frameImages[index];
     const empty = frameEmpties[index];
-    image.src = draftPhoto.src;
-    image.hidden = !draftPhoto.src;
-    empty.hidden = Boolean(draftPhoto.src) || !selected;
-    empty.innerHTML = "ВЫБРАТЬ<br>ФОТО";
+    const previewSrc = option.dataset.shape === "cutout" ? draftPhoto.cutoutSrc : (draftPhoto.originalSrc || draftPhoto.src);
+    image.src = previewSrc;
+    image.hidden = !previewSrc;
+    option.classList.toggle("has-photo", Boolean(previewSrc));
+    option.classList.toggle("is-processing", option.dataset.shape === "cutout" && isCutoutProcessing);
+    empty.hidden = Boolean(previewSrc) || !selected;
+    empty.innerHTML = option.dataset.shape === "cutout" && isCutoutProcessing
+      ? "ВЫРЕЗАЮ…"
+      : option.dataset.shape === "cutout" && cutoutError
+        ? cutoutErrorMessage
+        : "ВЫБРАТЬ<br>ФОТО";
     setPhotoTransform(image, draftPhoto);
   });
-  photoApply.disabled = !draftPhoto.src;
+  photoApply.disabled = !draftPhoto.src || (draftPhoto.shape === "cutout" && isCutoutProcessing);
   photoZoom.value = draftPhoto.zoom;
   photoZoom.disabled = !draftPhoto.src;
 }
@@ -120,8 +319,7 @@ function renderPhotoEditor() {
 function selectAdjacentFrame(direction) {
   const current = frameOptions.findIndex((option) => option.dataset.shape === draftPhoto.shape);
   const next = (current + direction + frameOptions.length) % frameOptions.length;
-  draftPhoto.shape = frameOptions[next].dataset.shape;
-  renderPhotoEditor();
+  selectFrameShape(frameOptions[next].dataset.shape);
   frameOptions[next].focus({ preventScroll: true });
 }
 
@@ -164,8 +362,12 @@ photoFile.addEventListener("change", () => {
   if (!file || !file.type.startsWith("image/")) return;
   const reader = new FileReader();
   reader.addEventListener("load", () => {
-    draftPhoto = { ...draftPhoto, src: String(reader.result), zoom: 1, x: 0, y: 0 };
-    renderPhotoEditor();
+    const source = String(reader.result);
+    cutoutError = false;
+    cutoutErrorMessage = "";
+    draftPhoto = { ...draftPhoto, originalSrc: source, cutoutSrc: "", src: source, zoom: 1, x: 0, y: 0 };
+    if (draftPhoto.shape === "cutout") prepareCutout(source);
+    else renderPhotoEditor();
     photoFile.value = "";
   });
   reader.readAsDataURL(file);
@@ -175,8 +377,7 @@ frameOptions.forEach((option) => {
   option.addEventListener("click", () => {
     if (suppressFrameClick) return;
     if (option.dataset.shape !== draftPhoto.shape) {
-      draftPhoto.shape = option.dataset.shape;
-      renderPhotoEditor();
+      selectFrameShape(option.dataset.shape);
       option.focus({ preventScroll: true });
       return;
     }
