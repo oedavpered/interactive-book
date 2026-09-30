@@ -4,6 +4,8 @@ const scene = document.querySelector(".scene");
 const closeFocusButton = document.querySelector(".close-focus");
 const ownerProfile = document.querySelector(".keeper-profile");
 const ownerFields = document.querySelectorAll(".keeper-profile input, .keeper-profile textarea, .keeper-profile button");
+const ownerNameInput = document.querySelector(".keeper-name input");
+const ownerNameDisplay = document.querySelector(".keeper-name-display");
 const avatarSlot = document.querySelector(".avatar-slot");
 const avatarPhotoFrame = document.querySelector(".avatar-photo-frame");
 const avatarImage = document.querySelector(".avatar-image");
@@ -51,6 +53,32 @@ const assetFrames = {
   "lace-heart": "./assets/frames/lace-heart-frame.png",
   "lace-oval": "./assets/frames/lace-oval-frame.png"
 };
+
+function fitOwnerName() {
+  const maxSize = 52;
+  const minSize = 30;
+  const availableWidth = Math.max(0, ownerNameInput.clientWidth - 28);
+  const value = ownerNameInput.value || "";
+  ownerNameDisplay.textContent = value;
+  if (!value || !availableWidth) {
+    ownerNameInput.style.fontSize = `${maxSize}px`;
+    ownerNameDisplay.style.fontSize = `${maxSize}px`;
+    return;
+  }
+  const context = fitOwnerName.context ||= document.createElement("canvas").getContext("2d");
+  let size = maxSize;
+  while (size > minSize) {
+    context.font = `400 ${size}px "Great Vibes"`;
+    if (context.measureText(value).width <= availableWidth) break;
+    size -= 1;
+  }
+  ownerNameInput.style.fontSize = `${size}px`;
+  ownerNameDisplay.style.fontSize = `${size}px`;
+}
+
+ownerNameInput.addEventListener("input", fitOwnerName);
+window.addEventListener("resize", fitOwnerName);
+document.fonts?.ready.then(fitOwnerName);
 
 function scrollProgress() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
