@@ -381,6 +381,23 @@ body {
   transform: translateZ(1px); backface-visibility: hidden; -webkit-backface-visibility: hidden;
   filter: drop-shadow(2px 5px 5px rgba(147,54,105,.16));
 }
+.cover-picker {
+  position: absolute; left: clamp(16px,4vw,64px); top: 50%; z-index: 45;
+  display: flex; flex-direction: column; gap: 16px; transform: translateY(-50%);
+}
+.cover-choice {
+  width: 48px; height: 48px; padding: 3px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; background: #fff; box-shadow: 0 3px 10px #40313b1a;
+  transition: transform .2s ease,border-color .2s ease;
+}
+.cover-choice canvas { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.cover-choice[aria-pressed="true"] { border-color: #776574; }
+.cover-choice:hover { transform: scale(1.09); }
+.cover-choice:focus-visible { outline: 2px solid #776574; outline-offset: 4px; }
+@media (max-width: 700px) {
+  .cover-picker { left: 9px; gap: 12px; }
+  .cover-choice { width: 36px; height: 36px; padding: 2px; }
+}
 .cover::before,
 .cover::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
