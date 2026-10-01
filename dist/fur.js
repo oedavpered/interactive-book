@@ -14,25 +14,75 @@
   const pad = 14;
   let seed = 731;
   const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
-  const leopardImage = new Image();
-  leopardImage.onload = () => {
-    if (width && height) leopardSurface = makeLeopard(width, height);
-    const swatch = document.querySelector('[data-cover="leopard"] canvas');
-    swatch.getContext('2d').drawImage(makeLeopard(96,96),0,0,96,96);
-    wake();
-  };
-  leopardImage.src = './assets/covers/leopard-fur.jpg';
+  // Generated from geometry and individually shaded fibres; no photo texture.
+  let leopardMaster;
   function makeLeopard(w, h) {
+    if (!leopardMaster) leopardMaster = createLeopard();
     const surface = document.createElement('canvas');
     surface.width = Math.ceil(w * 2); surface.height = Math.ceil(h * 2);
-    const c = surface.getContext('2d');
-    c.fillStyle = '#ab865b';
-    c.fillRect(0,0,surface.width,surface.height);
-    if (leopardImage.naturalWidth) {
-      // Cover crop preserves the reference's natural proportions and short nap.
-      const scale = Math.max(surface.width / leopardImage.naturalWidth, surface.height / leopardImage.naturalHeight);
-      const dw = leopardImage.naturalWidth * scale, dh = leopardImage.naturalHeight * scale;
-      c.drawImage(leopardImage,(surface.width-dw)/2,(surface.height-dh)/2,dw,dh);
+    surface.getContext('2d').drawImage(leopardMaster,0,0,surface.width,surface.height);
+    return surface;
+  }
+  function createLeopard() {
+    const surface = document.createElement('canvas');
+    const W=780,H=1076;
+    surface.width=W;surface.height=H;
+    const c=surface.getContext('2d');
+    seed=8047;
+    c.fillStyle='#bc955f';c.fillRect(0,0,W,H);
+    // Broad tonal variations suggest the changing direction of a short pile.
+    for(let n=0;n<65;n++) {
+      const x=random()*W,y=random()*H,r=45+random()*170;
+      const g=c.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,n%2?'rgba(235,210,153,.25)':'rgba(92,54,29,.22)');
+      g.addColorStop(1,'transparent');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2);
+    }
+    function blob(x,y,rx,ry,angle,color) {
+      c.save();c.translate(x,y);c.rotate(angle);
+      const points=[];
+      for(let k=0;k<12;k++) {
+        const a=k*Math.PI/6,r=.77+random()*.38;
+        points.push([Math.cos(a)*rx*r,Math.sin(a)*ry*r]);
+      }
+      c.beginPath();
+      c.moveTo((points[11][0]+points[0][0])/2,(points[11][1]+points[0][1])/2);
+      for(let k=0;k<12;k++) {
+        const p=points[k],q=points[(k+1)%12];
+        c.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2);
+      }
+      c.closePath();c.fillStyle=color;c.fill();c.restore();
+    }
+    for(let row=-1;row<10;row++) for(let col=-1;col<8;col++) {
+      const x=col*118+(row%2)*56+(random()-.5)*46;
+      const y=row*130+(random()-.5)*52;
+      const rx=29+random()*22,ry=33+random()*26,angle=random()*Math.PI;
+      blob(x,y,rx*.78,ry*.8,angle,'#936235');
+      const pieces=4+Math.floor(random()*2);
+      const phase=random()*Math.PI*2;
+      for(let s=0;s<pieces;s++) {
+        const a=phase+s/pieces*Math.PI*2+(random()-.5)*.4;
+        const px=Math.cos(a)*rx,py=Math.sin(a)*ry;
+        const xx=x+px*Math.cos(angle)-py*Math.sin(angle);
+        const yy=y+px*Math.sin(angle)+py*Math.cos(angle);
+        blob(xx,yy,13+random()*10,27+random()*16,a+angle,random()>.5?'#20150f':'#160f0d');
+      }
+      if(random()>.35) blob(x+57,y+60,6+random()*10,8+random()*14,random()*3,'#251910');
+    }
+    const pixels=c.getImageData(0,0,W,H).data;
+    // Sample each root's pigment and carry it along the strand to feather spots.
+    c.lineCap='round';
+    for(let n=0;n<145000;n++) {
+      const x=random()*W,y=random()*H;
+      const index=(Math.floor(y)*W+Math.floor(x))*4;
+      const r=pixels[index],g=pixels[index+1],b=pixels[index+2];
+      const angle=-1.18+.36*Math.sin(x*.018+y*.01)+.22*Math.cos(y*.031)+(random()-.5)*.55;
+      const length=3+random()*8;
+      const light=(random()-.45)*(r<65?15:50);
+      c.strokeStyle='rgba('+Math.max(0,r+light)+','+Math.max(0,g+light*.87)+','+Math.max(0,b+light*.7)+',.7)';
+      c.lineWidth=.45+random()*.45;
+      c.beginPath();c.moveTo(x,y);
+      c.quadraticCurveTo(x+Math.cos(angle+.18)*length*.5,y+Math.sin(angle+.18)*length*.5,x+Math.cos(angle)*length,y+Math.sin(angle)*length);
+      c.stroke();
     }
     return surface;
   }
