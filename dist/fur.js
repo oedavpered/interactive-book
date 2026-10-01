@@ -14,45 +14,25 @@
   const pad = 14;
   let seed = 731;
   const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const leopardImage = new Image();
+  leopardImage.onload = () => {
+    if (width && height) leopardSurface = makeLeopard(width, height);
+    const swatch = document.querySelector('[data-cover="leopard"] canvas');
+    swatch.getContext('2d').drawImage(makeLeopard(96,96),0,0,96,96);
+    wake();
+  };
+  leopardImage.src = './assets/covers/leopard-fur.jpg';
   function makeLeopard(w, h) {
     const surface = document.createElement('canvas');
     surface.width = Math.ceil(w * 2); surface.height = Math.ceil(h * 2);
     const c = surface.getContext('2d');
-    c.scale(2,2); seed = 1984;
-    const base = c.createLinearGradient(0,0,w,h);
-    base.addColorStop(0,'#d6ad72'); base.addColorStop(.5,'#c5985f'); base.addColorStop(1,'#e1bb84');
-    c.fillStyle=base; c.fillRect(0,0,w,h);
-    // Broken, irregular rosettes rather than solid polka dots.
-    for(let row=-1;row<h/43+1;row++) for(let col=-1;col<w/44+1;col++) {
-      const x=col*44+(row%2)*22+(random()-.5)*16;
-      const y=row*43+(random()-.5)*16;
-      const rx=10+random()*8,ry=9+random()*7;
-      c.save();c.translate(x,y);c.rotate(random()*Math.PI);
-      c.fillStyle='#a77340';c.beginPath();c.ellipse(0,0,rx*.85,ry*.85,0,0,Math.PI*2);c.fill();
-      const segments=3+Math.floor(random()*3);
-      for(let s=0;s<segments;s++) {
-        const a=s/segments*Math.PI*2+random()*.3;
-        const span=(.55+random()*.3)*Math.PI*2/segments;
-        c.strokeStyle=random()>.5?'#39251c':'#493020'; c.lineWidth=3+random()*3;c.lineCap='round';
-        c.beginPath();
-        for(let k=0;k<=9;k++) {
-          const t=a+span*k/9,rr=1+Math.sin(t*5+x)*.11;
-          const px=Math.cos(t)*rx*rr,py=Math.sin(t)*ry*rr;
-          if(k===0)c.moveTo(px,py);else c.lineTo(px,py);
-        }
-        c.stroke();
-      }
-      c.restore();
-      c.fillStyle='#4a3020';c.beginPath();c.ellipse(x+22,y+21,1.5+random()*2,2+random()*2,random()*3,0,Math.PI*2);c.fill();
-    }
-    // Fine, sparse nap follows the colour underneath each individual hair.
-    const pixels=c.getImageData(0,0,surface.width,surface.height).data;
-    for(let n=0;n<w*h/21;n++) {
-      const x=random()*w,y=random()*h;
-      const index=(Math.floor(y*2)*surface.width+Math.floor(x*2))*4;
-      const light=random()>.5?23:-16;
-      c.strokeStyle=`rgba(${Math.max(0,pixels[index]+light)},${Math.max(0,pixels[index+1]+light)},${Math.max(0,pixels[index+2]+light)},.55)`;
-      c.lineWidth=.45;c.beginPath();c.moveTo(x,y);c.lineTo(x+.6+random()*1.1,y-1.5-random()*2);c.stroke();
+    c.fillStyle = '#ab865b';
+    c.fillRect(0,0,surface.width,surface.height);
+    if (leopardImage.naturalWidth) {
+      // Cover crop preserves the reference's natural proportions and short nap.
+      const scale = Math.max(surface.width / leopardImage.naturalWidth, surface.height / leopardImage.naturalHeight);
+      const dw = leopardImage.naturalWidth * scale, dh = leopardImage.naturalHeight * scale;
+      c.drawImage(leopardImage,(surface.width-dw)/2,(surface.height-dh)/2,dw,dh);
     }
     return surface;
   }
