@@ -375,6 +375,12 @@ body {
   backface-visibility: visible; -webkit-backface-visibility: visible;
 }
 .book.is-cover-open .cover { z-index: 1; }
+.cover-fur {
+  position: absolute; z-index: 3; left: -14px; top: -14px;
+  width: calc(100% + 28px); height: calc(100% + 28px);
+  transform: translateZ(1px); backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  filter: drop-shadow(2px 5px 5px rgba(147,54,105,.16));
+}
 .cover::before,
 .cover::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
@@ -393,12 +399,14 @@ body {
   transform: rotateY(180deg) translateZ(.5px);
 }
 .cover-inset {
+  display: none;
   position: absolute; z-index: 1; inset: 4.5%; border-radius: 11px;
   box-shadow: inset 0 0 0 1px rgba(143,151,154,.11), inset 0 12px 22px rgba(255,255,255,.18);
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .mark { position: relative; z-index: 1; width: 33%; aspect-ratio: 1; opacity: .22; transform: rotate(45deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .mark i {
+  display: none;
   position: absolute; width: 48%; height: 48%; border: max(2px,.35vw) solid #879094;
   border-radius: 50% 50% 8% 50%;
 }
