@@ -293,6 +293,7 @@
   }
   function draw(time) {
     frame = 0;
+    if(theme==='pink' && cover.classList.contains('has-shell-fur')) return;
     if (!width || !height || !leopardSurface) return;
     const decay = Math.exp(-Math.min(50,time-lastTime || 16)/150);
     lastTime = time;
@@ -344,6 +345,7 @@
   function release(){pointer=null;previous=null;wake();}
   function selectTheme(value) {
     theme=value; release();
+    document.querySelector('.cover').dataset.theme=value;
     colorPanel.hidden=theme!=='glitter';
     choices.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.cover===theme)));
     try { localStorage.setItem('book-cover-theme',theme); } catch {}
