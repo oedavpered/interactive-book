@@ -394,6 +394,16 @@ body {
 .cover-choice[aria-pressed="true"] { border-color: #776574; }
 .cover-choice:hover { transform: scale(1.09); }
 .cover-choice:focus-visible { outline: 2px solid #776574; outline-offset: 4px; }
+.glitter-colors { display: grid; grid-template-columns: repeat(2,22px); gap: 7px; padding-top: 7px; border-top: 1px solid #ddd6db; }
+.glitter-colors[hidden] { display: none; }
+.glitter-colors button, .glitter-custom { width: 22px; height: 22px; border-radius: 50%; padding: 0; border: 2px solid #fff; box-shadow: 0 1px 4px #0002; cursor: pointer; }
+.glitter-colors button { background: radial-gradient(circle at 30% 23%,#ffffffa0,transparent 38%),var(--swatch); }
+.glitter-colors button[aria-pressed="true"] { outline: 1.5px solid #776574; outline-offset: 2px; }
+.glitter-custom { overflow: hidden; background: conic-gradient(#ff6baf,#ffd768,#6ae1c5,#797aff,#ff6baf); }
+.glitter-custom::-webkit-color-swatch-wrapper { padding: 4px; }
+.glitter-custom::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.glitter-custom::-moz-color-swatch { border: 3px solid transparent; border-radius: 50%; }
+.glitter-colors :focus-visible { outline: 2px solid #776574; outline-offset: 3px; }
 @media (max-width: 700px) {
   .cover-picker { left: 9px; gap: 12px; }
   .cover-choice { width: 36px; height: 36px; padding: 2px; }
