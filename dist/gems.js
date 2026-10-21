@@ -32,6 +32,7 @@
   panel.innerHTML='<button class="decor-close" type="button" aria-label="Закрыть инструменты">×</button><div class="gem-bag" role="group" aria-label="Пакетик: выбери цвет страз"></div><div class="decor-options"><p class="gem-help" role="status">Выбери пакетик и нажми на страницу</p><div class="gem-actions"><button class="gem-undo" type="button" disabled>↶ Отменить стразик</button><button class="gem-done" type="button">Готово</button></div></div>';
   document.body.append(launch,panel);
   const bag=panel.querySelector('.gem-bag'),help=panel.querySelector('.gem-help'),undo=panel.querySelector('.gem-undo');
+  undo.textContent='↶';undo.setAttribute('aria-label','Отменить последний стразик');undo.title='Отменить последний стразик';bag.append(undo);
   let crystalId=0;
   function crystal(color){
     const {h,s}=colors[color]||{h:310,s:90},id='crystal-'+(++crystalId);
@@ -60,7 +61,7 @@
     b.onclick=()=>choose(c,b);bag.append(b);
   });
   const mix=document.createElement('button');mix.type='button';mix.className='bag-stone bag-mix';mix.innerHTML=crystal(-1);mix.setAttribute('aria-label','Случайные цвета');mix.setAttribute('aria-pressed','true');mix.onclick=()=>choose(-1,mix);bag.append(mix);
-  function choose(color,button){selected=color;bag.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));setActive(true);}
+  function choose(color,button){selected=color;bag.querySelectorAll('.bag-stone').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));setActive(true);}
   const layers=faces.map((face,i)=>{const layer=document.createElement('span');layer.className='gem-layer';layer.dataset.page=i;layer.setAttribute('aria-label',`Страница ${i+1}: нажмите для стразика, Enter — в центре`);face.append(layer);return layer;});
   function setActive(value){active=value;document.documentElement.classList.toggle('gem-mode',value);bag.dataset.active=String(value);layers.forEach(l=>l.tabIndex=value?0:-1);help.textContent='';}
   function close(){setActive(false);panel.classList.remove('is-open');panel.inert=true;launch.hidden=false;launch.setAttribute('aria-expanded','false');}
