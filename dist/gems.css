@@ -15,7 +15,8 @@
 .bag-stone { position:absolute; width:32px; height:32px; padding:2px; border:0; background:transparent; border-radius:50%; cursor:pointer; transform:rotate(var(--stone-turn)); transition:transform .2s,filter .2s; filter:drop-shadow(0 2px 1px #78657755); }
 .bag-stone:hover,.bag-stone:focus-visible { transform:translateY(-4px) rotate(0deg) scale(1.15); filter:drop-shadow(0 3px 3px #b4a0cd66); }
 .bag-stone[aria-pressed=true],.bag-mix[aria-pressed=true] { outline:1px solid #a98da9; outline-offset:3px; }
-.bag-mix { position:absolute; bottom:9px; left:30%; width:46%; border:0; border-radius:12px; background:#fffb; color:#93728d; padding:5px; font:10px Arial,sans-serif; cursor:pointer; }
+.bag-mix { bottom:6px; left:calc(50% - 16px); --stone-turn:0deg; }
+.gem-help:empty { display:none; }
 .decor-options { flex:1; min-width:0; padding-right:12px; }
 .decor-options p { margin:0 0 12px; font-size:12px; color:#91848f; }
 .gem-colors { display:flex; gap:9px; flex-wrap:wrap; }

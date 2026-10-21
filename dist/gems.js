@@ -34,12 +34,14 @@
   const bag=panel.querySelector('.gem-bag'),help=panel.querySelector('.gem-help'),undo=panel.querySelector('.gem-undo');
   let crystalId=0;
   function crystal(color){
-    const {h,s}=colors[color],id='crystal-'+(++crystalId);
+    const {h,s}=colors[color]||{h:310,s:90},id='crystal-'+(++crystalId);
+    let rainbowHue=0;
     const point=(r,a)=>[50+Math.cos(a)*r,50+Math.sin(a)*r];
-    const tint=(light,shift=0)=>'hsl('+(h+shift)+' '+(color===0?6:s*.38)+'% '+light+'%)';
+    const tint=(light,shift=0)=>'hsl('+(h+shift+rainbowHue)+' '+(color===0?6:Math.min(96,s*1.15))+'% '+(color===0?light:light-(100-light)*.32)+'%)';
     let art='',table=[];
     const polygon=(pts,light,a,shift=0)=>'<polygon points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="'+tint(light,shift)+'"/><polygon class="gem-facet" data-angle="'+a+'" points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="white" opacity="0"/>';
     for(let i=0;i<8;i++){
+      rainbowHue=color<0?i*45:0;
       const a=i*Math.PI/4-Math.PI/8,b=a+Math.PI/4;
       const p=point(47,a),q=point(47,b),m=point(47,a+Math.PI/8),u=point(25,a),v=point(25,b),k=point(37,a+Math.PI/8);
       table.push(u);
@@ -57,10 +59,10 @@
     b.style.cssText='left:'+(12+(c%3)*29)+'%;top:'+(36+Math.floor(c/3)*24)+'%;--stone-turn:'+(c%2?9:-8)+'deg';
     b.onclick=()=>choose(c,b);bag.append(b);
   });
-  const mix=document.createElement('button');mix.type='button';mix.className='bag-mix';mix.textContent='Микс ✧';mix.setAttribute('aria-label','Случайные цвета');mix.setAttribute('aria-pressed','true');mix.onclick=()=>choose(-1,mix);bag.append(mix);
+  const mix=document.createElement('button');mix.type='button';mix.className='bag-stone bag-mix';mix.innerHTML=crystal(-1);mix.setAttribute('aria-label','Случайные цвета');mix.setAttribute('aria-pressed','true');mix.onclick=()=>choose(-1,mix);bag.append(mix);
   function choose(color,button){selected=color;bag.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));setActive(true);}
   const layers=faces.map((face,i)=>{const layer=document.createElement('span');layer.className='gem-layer';layer.dataset.page=i;layer.setAttribute('aria-label',`Страница ${i+1}: нажмите для стразика, Enter — в центре`);face.append(layer);return layer;});
-  function setActive(value){active=value;document.documentElement.classList.toggle('gem-mode',value);bag.dataset.active=String(value);layers.forEach(l=>l.tabIndex=value?0:-1);help.textContent=value?'Цвет — в пакетике. Нажми на страницу, чтобы приклеить':'Выбери пакетик и нажми на страницу';}
+  function setActive(value){active=value;document.documentElement.classList.toggle('gem-mode',value);bag.dataset.active=String(value);layers.forEach(l=>l.tabIndex=value?0:-1);help.textContent='';}
   function close(){setActive(false);panel.classList.remove('is-open');panel.inert=true;launch.hidden=false;launch.setAttribute('aria-expanded','false');}
   launch.onclick=()=>{
     if(progress<.18){openFirstSpread();help.textContent='Открываем книгу…';setTimeout(()=>{enterFocus();show();},1100);}else{enterFocus();show();}
