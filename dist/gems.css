@@ -22,7 +22,13 @@
 .gem-layer { position:absolute; inset:0; z-index:8; pointer-events:none; display:block; }
 .gem-stone { position:absolute; display:block; width:var(--gem-size); height:var(--gem-size); transform:translate(-50%,-50%) rotate(var(--gem-angle)); filter:drop-shadow(1px 2px 1px #4b344d66); pointer-events:none; }
 .gem-stone svg,.bag-stone svg { display:block; width:100%; height:100%; overflow:visible; }
-.gem-facet { transition:fill .12s; }
+.gem-facet { transition:opacity .12s; }
+.gem-stars { transform-origin:50px 50px; transition:transform .15s; }
+.gem-star { transform-box:fill-box; transform-origin:center; filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px #e6c9ff); animation:gem-twinkle 5.7s var(--twinkle-delay,0s) infinite; }
+.gem-star-b { animation-duration:7.3s; }
+.bag-stone .gem-stars { display:none; }
+@keyframes gem-twinkle { 0%,38%,58%,100% { opacity:var(--gem-flash,0); transform:scale(.38); } 46% { opacity:1; transform:scale(1); } 51% { opacity:.12; transform:scale(.55); } }
+@media(prefers-reduced-motion:reduce) { .gem-star { animation:none; opacity:var(--gem-flash,.15); } .gem-stars { transition:none; } }
 .gem-spark { opacity:0; transition:opacity .12s; }
 .gem-mode .page-face { cursor:crosshair; }
 .gem-mode .keeper-profile { pointer-events:none; }
