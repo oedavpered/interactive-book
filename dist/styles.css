@@ -386,7 +386,7 @@ body {
   display: flex; flex-direction: column; gap: 16px; transform: translateY(-50%);
 }
 .shell-fur { display:none; position:absolute; z-index:4; left:-32px; top:-32px; width:calc(100% + 64px); height:calc(100% + 64px); transform:translateZ(1.2px); backface-visibility:hidden; -webkit-backface-visibility:hidden; }
-.has-shell-fur[data-theme="pink"] .shell-fur { display:block; filter:blur(.45px); }
+.has-shell-fur[data-theme="pink"] .shell-fur { display:block; }
 .has-shell-fur[data-theme="pink"] .cover-fur { visibility:hidden; }
 .cover-choice {
   width: 48px; height: 48px; padding: 3px; border-radius: 50%; cursor: pointer;
