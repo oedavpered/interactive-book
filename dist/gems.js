@@ -14,13 +14,14 @@
       setTimeout(()=>{
         if(!item.element.isConnected||document.hidden||gemAudio.state!=='running')return;
         const now=gemAudio.currentTime,frequency=1350+(26-item.size)*48+Math.random()*90;
-        [1,2.31,3.7].forEach((ratio,i)=>{
+        [1,2.76,5.4].forEach((ratio,i)=>{
           const osc=gemAudio.createOscillator(),gain=gemAudio.createGain();
           osc.type='sine';osc.frequency.setValueAtTime(frequency*ratio,now);
-          osc.frequency.exponentialRampToValueAtTime(frequency*ratio*.94,now+.13);
-          gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.045/(i+1),now+.004);
-          gain.gain.exponentialRampToValueAtTime(.0001,now+.18+i*.025);
-          osc.connect(gain);gain.connect(gemAudio.destination);osc.start(now);osc.stop(now+.27);
+          // Nearly fixed inharmonic resonances give a glass-like ring.
+          osc.frequency.exponentialRampToValueAtTime(frequency*ratio*.998,now+.2);
+          gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.038/(i+1),now+.002);
+          gain.gain.exponentialRampToValueAtTime(.0001,now+[.38,.23,.11][i]);
+          osc.connect(gain);gain.connect(gemAudio.destination);osc.start(now);osc.stop(now+.42);
           osc.onended=()=>{osc.disconnect();gain.disconnect();};
         });
       },reduced.matches?0:440);
@@ -41,7 +42,7 @@
       defs+=`<linearGradient id="${id}-${i}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="hsl(${h-12} ${s}% ${l+15}%)"/><stop offset=".45" stop-color="hsl(${h} ${s}% ${l}%)"/><stop offset=".52" stop-color="hsl(${h+22} ${s}% ${Math.min(96,l+33)}%)"/><stop offset="1" stop-color="hsl(${h} ${s}% 22%)"/></linearGradient>`;
       facets+=`<polygon points="${p} ${q} ${v} ${u}" fill="url(#${id}-${i})" stroke="white" stroke-opacity=".35" stroke-width=".6"/><polygon points="48,45 ${u} ${v}" fill="url(#${id}-${(i+4)%10})"/><polygon class="gem-facet" data-angle="${a}" points="${p} ${q} ${v} ${u}" fill="white" opacity="0"/><polygon class="gem-facet" data-angle="${a+1.6}" points="48,45 ${u} ${v}" fill="white" opacity="0"/>`;
     }
-    return `<svg viewBox="0 0 100 100" aria-hidden="true"><defs>${defs}<radialGradient id="${id}-glass" cx=".28" cy=".2" r=".85"><stop stop-color="white" stop-opacity=".9"/><stop offset=".3" stop-color="white" stop-opacity=".05"/><stop offset=".65" stop-color="hsl(${h} 90% 65%)" stop-opacity=".15"/><stop offset="1" stop-color="#190e38" stop-opacity=".65"/></radialGradient></defs><ellipse cx="51" cy="55" rx="48" ry="46" fill="hsl(${h} 35% 20%)"/><circle cx="50" cy="49" r="47" fill="hsl(${h} ${s}% 30%)" stroke="#ddd7ec" stroke-width="2"/>${facets}<circle cx="50" cy="49" r="46" fill="url(#${id}-glass)"/><path d="M18 29Q32 10 55 15" fill="none" stroke="white" stroke-width="3" opacity=".9"/><path d="M64 84L83 63" stroke="hsl(${h+55} 90% 87%)" stroke-width="2" opacity=".8"/><g class="gem-stars"><g class="gem-star gem-star-a" style="--twinkle-delay:-${crystalId%9}s"><path d="M24 -11Q27 20 54 23Q27 26 24 57Q21 26 -6 23Q21 20 24 -11Z" fill="white"/><circle cx="24" cy="23" r="3" fill="white"/></g><g class="gem-star gem-star-b" style="--twinkle-delay:-${crystalId%7+2}s"><path d="M78 52Q80 72 98 75Q80 78 78 98Q75 78 57 75Q75 72 78 52Z" fill="white"/></g></g></svg>`;
+    return `<svg viewBox="0 0 100 100" aria-hidden="true"><defs>${defs}<radialGradient id="${id}-glass" cx=".28" cy=".2" r=".85"><stop stop-color="white" stop-opacity=".9"/><stop offset=".3" stop-color="white" stop-opacity=".05"/><stop offset=".65" stop-color="hsl(${h} 90% 65%)" stop-opacity=".15"/><stop offset="1" stop-color="#190e38" stop-opacity=".65"/></radialGradient></defs><circle cx="50" cy="50" r="47" fill="hsl(${h} ${s}% 30%)" stroke="#ddd7ec" stroke-width="2"/>${facets}<circle cx="50" cy="50" r="46" fill="url(#${id}-glass)"/><path d="M18 29Q32 10 55 15" fill="none" stroke="white" stroke-width="3" opacity=".9"/><path d="M64 84L83 63" stroke="hsl(${h+55} 90% 87%)" stroke-width="2" opacity=".8"/><g class="gem-stars"><g class="gem-star gem-star-a" style="--twinkle-delay:-${crystalId%9}s"><path d="M24 -11Q27 20 54 23Q27 26 24 57Q21 26 -6 23Q21 20 24 -11Z" fill="white"/><circle cx="24" cy="23" r="3" fill="white"/></g><g class="gem-star gem-star-b" style="--twinkle-delay:-${crystalId%7+2}s"><path d="M78 52Q80 72 98 75Q80 78 78 98Q75 78 57 75Q75 72 78 52Z" fill="white"/></g></g></svg>`;
   }
   for(let i=0;i<9;i++){const s=document.createElement('span');s.className='bag-stone';s.innerHTML=crystal(i%colors.length);s.style.cssText=`left:${8+(i%3)*27}%;top:${55+Math.floor(i/3)*13}%;transform:rotate(${i*39}deg)`;bag.append(s);}
   [-1,...colors.keys()].forEach(c=>{const b=document.createElement('button');b.type='button';b.className='gem-color';b.setAttribute('aria-label',c<0?'Случайные цвета':colors[c].name);b.setAttribute('aria-pressed',String(c===selected));b.style.setProperty('--color',c<0?'conic-gradient(#efa9d2,#acdef0,#c8b1e9,#a7dfc7,#f0d59a,#efa9d2)':`hsl(${colors[c].h} ${colors[c].s}% 76%)`);b.onclick=()=>{selected=c;panel.querySelectorAll('.gem-color').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));};panel.querySelector('.gem-colors').append(b);});
