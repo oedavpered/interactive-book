@@ -4,6 +4,28 @@
   const faces=[...document.querySelectorAll('.page-face')];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let selected=-1,active=false,items=[],frame=0,lastPointer=null;
+  let gemAudio=null;
+  function landingSound(item){
+    try {
+      const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
+      gemAudio ||= new Audio();
+      if(gemAudio.state==='suspended')gemAudio.resume().catch(()=>{});
+      // Unlock on the click, then chime at the landing rather than at takeoff.
+      setTimeout(()=>{
+        if(!item.element.isConnected||document.hidden||gemAudio.state!=='running')return;
+        const now=gemAudio.currentTime,frequency=1350+(26-item.size)*48+Math.random()*90;
+        [1,2.31,3.7].forEach((ratio,i)=>{
+          const osc=gemAudio.createOscillator(),gain=gemAudio.createGain();
+          osc.type='sine';osc.frequency.setValueAtTime(frequency*ratio,now);
+          osc.frequency.exponentialRampToValueAtTime(frequency*ratio*.94,now+.13);
+          gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.045/(i+1),now+.004);
+          gain.gain.exponentialRampToValueAtTime(.0001,now+.18+i*.025);
+          osc.connect(gain);gain.connect(gemAudio.destination);osc.start(now);osc.stop(now+.27);
+          osc.onended=()=>{osc.disconnect();gain.disconnect();};
+        });
+      },reduced.matches?0:440);
+    }catch{/* Sound is optional when audio is unavailable. */}
+  }
   const launch=document.createElement('button');launch.className='decor-launch';launch.type='button';launch.innerHTML='<span aria-hidden="true">✧</span>Украшения';launch.setAttribute('aria-expanded','false');launch.setAttribute('aria-controls','decor-panel');
   const panel=document.createElement('section');panel.id='decor-panel';panel.className='decor-panel';panel.setAttribute('aria-label','Инструменты украшения');panel.inert=true;
   panel.innerHTML='<button class="decor-close" type="button" aria-label="Закрыть инструменты">×</button><button class="gem-bag" type="button" aria-label="Пакетик со стразами" aria-pressed="false"></button><div class="decor-options"><p class="gem-help" role="status">Выбери пакетик и нажми на страницу</p><div class="gem-colors" role="group" aria-label="Цвет страз"></div><div class="gem-actions"><button class="gem-undo" type="button" disabled>↶ Отменить стразик</button><button class="gem-done" type="button">Готово</button></div></div>';
@@ -36,7 +58,7 @@
     const el=document.createElement('span');el.className='gem-stone';el.style.cssText=`left:${item.x*100}%;top:${item.y*100}%;--gem-size:${item.size}px;--gem-angle:${item.angle}deg`;el.innerHTML=crystal(item.color);layers[item.page].append(el);item.element=el;
     if(animate&&!reduced.matches){const rest=`translate(-50%,-50%) rotate(${item.angle}deg)`;el.animate([{transform:`translate(-50%,calc(-50% - 100px)) rotate(${item.angle-50}deg) scale(1.6)`,opacity:0,filter:'drop-shadow(12px 24px 9px #4b344d22)'},{offset:.18,opacity:1},{offset:.75,transform:rest+' scale(.88)',filter:'drop-shadow(1px 1px 1px #4b344d66)'},{offset:.88,transform:rest+' scale(1.1)'},{transform:rest,opacity:1}],{duration:570,easing:'cubic-bezier(.3,.1,.55,1)'});}
   }
-  function place(page,x,y){if(items.length>=400){help.textContent='Уже 400 страз — сначала отмени лишние';return;}const rect=layers[page].getBoundingClientRect();if(rect.width<50)return;const size=17+Math.random()*9,marginX=18/faces[page].clientWidth,marginY=18/faces[page].clientHeight;const item={page,x:Math.max(marginX,Math.min(1-marginX,x)),y:Math.max(marginY,Math.min(1-marginY,y)),size,angle:Math.random()*360,color:selected<0?Math.floor(Math.random()*colors.length):selected};items.push(item);render(item,true);save();}
+  function place(page,x,y){if(items.length>=400){help.textContent='Уже 400 страз — сначала отмени лишние';return;}const rect=layers[page].getBoundingClientRect();if(rect.width<50)return;const size=10+Math.pow(Math.random(),1.5)*16,marginX=18/faces[page].clientWidth,marginY=18/faces[page].clientHeight;const item={page,x:Math.max(marginX,Math.min(1-marginX,x)),y:Math.max(marginY,Math.min(1-marginY,y)),size,angle:Math.random()*360,color:selected<0?Math.floor(Math.random()*colors.length):selected};items.push(item);render(item,true);landingSound(item);save();}
   layers.forEach((layer,page)=>{layer.addEventListener('click',e=>{if(!active)return;e.preventDefault();e.stopPropagation();place(page,e.offsetX/layer.clientWidth,e.offsetY/layer.clientHeight);});layer.addEventListener('keydown',e=>{if(active&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();place(page,.5,.5);}});});
   undo.onclick=()=>{const item=items.pop();item?.element.remove();save();};
   try{const stored=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(stored))items=stored.filter(i=>Number.isInteger(i.page)&&i.page>=0&&i.page<faces.length&&Number.isInteger(i.color)&&colors[i.color]&&[i.x,i.y,i.size,i.angle].every(Number.isFinite)&&i.x>=0&&i.x<=1&&i.y>=0&&i.y<=1&&i.size>=10&&i.size<=40).slice(0,400);items.forEach(i=>render(i));undo.disabled=!items.length;}catch{}
