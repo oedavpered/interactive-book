@@ -10,7 +10,12 @@
 .gem-bag::before { content:''; position:absolute; top:12px; left:5px; right:5px; height:5px; border-block:2px solid #c1aec7aa; box-shadow:0 2px 0 #fff; }
 .gem-bag::after { content:'STRASS'; position:absolute; top:35px; left:15px; right:15px; font:10px Arial; letter-spacing:3px; padding:6px 0; border-radius:4px; background:#fff9; color:#9c7897; }
 .gem-bag[aria-pressed=true] { outline:2px solid #c7a5c3; outline-offset:5px; }
-.bag-stone { position:absolute; width:23px; height:23px; pointer-events:none; }
+.gem-bag { width:150px; height:190px; margin-top:-95px; cursor:default; }
+.gem-bag::after { pointer-events:none; text-align:center; top:29px; }
+.bag-stone { position:absolute; width:32px; height:32px; padding:2px; border:0; background:transparent; border-radius:50%; cursor:pointer; transform:rotate(var(--stone-turn)); transition:transform .2s,filter .2s; filter:drop-shadow(0 2px 1px #78657755); }
+.bag-stone:hover,.bag-stone:focus-visible { transform:translateY(-4px) rotate(0deg) scale(1.15); filter:drop-shadow(0 3px 3px #b4a0cd66); }
+.bag-stone[aria-pressed=true],.bag-mix[aria-pressed=true] { outline:1px solid #a98da9; outline-offset:3px; }
+.bag-mix { position:absolute; bottom:9px; left:30%; width:46%; border:0; border-radius:12px; background:#fffb; color:#93728d; padding:5px; font:10px Arial,sans-serif; cursor:pointer; }
 .decor-options { flex:1; min-width:0; padding-right:12px; }
 .decor-options p { margin:0 0 12px; font-size:12px; color:#91848f; }
 .gem-colors { display:flex; gap:9px; flex-wrap:wrap; }
@@ -24,15 +29,11 @@
 .gem-stone svg,.bag-stone svg { display:block; width:100%; height:100%; overflow:visible; }
 .gem-facet { transition:opacity .12s; }
 .gem-stars { transform-origin:50px 50px; transition:transform .15s; }
-.gem-star { transform-box:fill-box; transform-origin:center; filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 5px #e6c9ff); animation:gem-twinkle 5.7s var(--twinkle-delay,0s) infinite; }
-.gem-star-b { animation-duration:7.3s; }
-.bag-stone .gem-stars { display:none; }
-@keyframes gem-twinkle { 0%,38%,58%,100% { opacity:var(--gem-flash,0); transform:scale(.38); } 46% { opacity:1; transform:scale(1); } 51% { opacity:.12; transform:scale(.55); } }
-@media(prefers-reduced-motion:reduce) { .gem-star { animation:none; opacity:var(--gem-flash,.15); } .gem-stars { transition:none; } }
+.gem-star { opacity:0; filter:drop-shadow(0 0 1px #fff); }
 .gem-spark { opacity:0; transition:opacity .12s; }
 .gem-mode .page-face { cursor:crosshair; }
 .gem-mode .keeper-profile { pointer-events:none; }
 .gem-mode .gem-layer { pointer-events:auto; touch-action:none; }
 .gem-mode .gem-layer:focus-visible { outline:2px dashed #c7a5c3; outline-offset:-8px; }
-@media(max-width:600px) { .decor-panel { gap:16px; padding:24px 18px 16px; } .gem-bag { width:82px; height:112px; margin-top:-38px; } .gem-colors { gap:8px; } .gem-color { width:24px; height:24px; } .decor-options p { font-size:11px; } }
+@media(max-width:600px) { .decor-panel { gap:16px; padding:24px 18px 16px; } .gem-bag { width:130px; height:180px; margin-top:-85px; } .decor-options p { font-size:11px; } .gem-actions { flex-direction:column; align-items:flex-start; gap:10px; } }
 @media(prefers-reduced-motion:reduce) { .decor-panel,.gem-bag,.gem-facet,.gem-spark { transition:none; } }
