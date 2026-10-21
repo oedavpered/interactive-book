@@ -385,7 +385,7 @@ body {
   position: absolute; left: clamp(16px,4vw,64px); top: 50%; z-index: 45;
   display: flex; flex-direction: column; gap: 16px; transform: translateY(-50%);
 }
-.shell-fur { display:none; position:absolute; z-index:4; left:-14px; top:-14px; width:calc(100% + 28px); height:calc(100% + 28px); transform:translateZ(1.2px); backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+.shell-fur { display:none; position:absolute; z-index:4; left:-32px; top:-32px; width:calc(100% + 64px); height:calc(100% + 64px); transform:translateZ(1.2px); backface-visibility:hidden; -webkit-backface-visibility:hidden; }
 .has-shell-fur[data-theme="pink"] .shell-fur { display:block; }
 .has-shell-fur[data-theme="pink"] .cover-fur { visibility:hidden; }
 .cover-choice {
