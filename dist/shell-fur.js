@@ -46,14 +46,14 @@
       vec2 center=vec2(.18)+vec2(hash(cell),hash(cell+37.0))*.64;
       float strand=hash(cell+81.0);
       float radius=mix(.49,.065,height)*( .65+strand*.5);
-      float coverage=1.0-smoothstep(radius-.07,radius+.07,length(f-center));
+      float coverage=1.0-smoothstep(radius-.13,radius+.13,length(f-center));
       if(height>strand*.65+.35)discard;
       if(height>.001&&coverage<.05)discard;
       float tuft=noise(root/22.0);
-      float light=.60+height*.48+strand*.12+tuft*.17;
-      vec3 pink=mix(vec3(.58,.16,.34),vec3(1.0,.75,.88),smoothstep(.05,.95,height)*.83+strand*.17);
+      float light=.86+height*.12+strand*.035+tuft*.045;
+      vec3 pink=mix(vec3(.80,.43,.61),vec3(.97,.72,.84),smoothstep(.05,.95,height)*.83+strand*.17);
       pink*=light;
-      pink+=vec3(.12,.085,.11)*pow(height,4.0)*(1.0-brush*.35);
+      pink+=vec3(.025,.018,.022)*pow(height,4.0)*(1.0-brush*.35);
       gl_FragColor=vec4(pink,height<.001?1.0:coverage*.86);
     }`;
   function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
